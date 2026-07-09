@@ -11,7 +11,8 @@
       "Bash(node /private/tmp/claude-501/-Users-roshan-systemboom-chat-protoytpe/9f1b5fcb-3c6c-4285-bbd9-fe7590780c0f/scratchpad/mkartifact.mjs)",
       "Bash(git add *)",
       "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Add single-file build for browsable hosting *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(gh api *)"
     ]
   }
 }
