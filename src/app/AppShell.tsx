@@ -6,9 +6,11 @@ import { BottomNav, NavRail, BrandMark, Tooltip } from '@/components'
 import { resolveRoute, NAV_ITEMS } from './routes'
 
 export function AppShell() {
-  const { path } = useRouter()
+  const { path, query } = useRouter()
   const breakpoint = useBreakpoint()
   const { route } = resolveRoute(path)
+  // Include query so query-differentiated screens (e.g. call kind) remount.
+  const pageKey = query.toString() ? `${path}?${query.toString()}` : path
 
   // Keep the document title in sync with the active screen (SC id + name).
   useEffect(() => {
@@ -24,8 +26,8 @@ export function AppShell() {
       <div className="sb-app">
         <div className="sb-frame">
           <main className="sb-shell" id="main" data-scroll-region>
-            <div className="sb-shell__main" data-scroll-region>
-              <div key={path} className="sb-page sb-fill">
+            <div className="sb-shell__main" data-scroll-region data-fill="true">
+              <div key={pageKey} className="sb-page sb-fill">
                 {route.element}
               </div>
             </div>
@@ -64,11 +66,11 @@ export function AppShell() {
 
         <main className="sb-shell" id="main">
           <div className="sb-shell__main" data-scroll-region data-fill="true">
-            <div key={path} className="sb-page sb-fill">
+            <div key={pageKey} className="sb-page sb-fill">
               {route.element}
             </div>
           </div>
-          {!isDesktop && <BottomNav items={NAV_ITEMS} activeId={route.tab ?? ''} />}
+          {!isDesktop && !route.deep && <BottomNav items={NAV_ITEMS} activeId={route.tab ?? ''} />}
         </main>
         <div className="sb-overlay-root" id="sb-overlay-root" />
       </div>

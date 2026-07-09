@@ -1,0 +1,324 @@
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  Phone,
+  Video,
+  Search,
+  MoreVertical,
+  Reply,
+  Copy,
+  Forward,
+  Pencil,
+  Trash2,
+  Pin,
+  Star,
+  ShieldCheck,
+  Info,
+  Camera,
+  Image as ImageIcon,
+  FileText,
+  MapPin,
+  Contact as ContactIcon,
+  ShoppingBag,
+  Megaphone,
+} from 'lucide-react'
+import { useRouter, useParams } from '@/lib/router'
+import {
+  TopAppBar,
+  IconButton,
+  Avatar,
+  Icon,
+  Banner,
+  BottomSheet,
+  ActionSheet,
+  ConfirmDialog,
+  Button,
+  ChatBubble,
+  DaySeparator,
+  SystemMessage,
+  TypingBubble,
+  MessageComposer,
+  AttachmentGrid,
+  useToast,
+} from '@/components'
+import { useStore, useConversation, useMessages, useUser } from '@/data/store'
+import { dayLabel } from '@/data/format'
+import type { Message } from '@/data/types'
+
+const QUICK_EMOJI = ['❤️', '😂', '👍', '😮', '😢', '🙏']
+
+export function ConversationScreen() {
+  const { navigate, back } = useRouter()
+  const { id } = useParams('/chats/:id')
+  const store = useStore()
+  const conv = useConversation(id)
+  const messages = useMessages(id)
+  const other = useUser(conv?.kind === 'private' ? conv.userId : undefined)
+  const toast = useToast()
+
+  const [draft, setDraft] = useState('')
+  const [replyTo, setReplyTo] = useState<Message | null>(null)
+  const [editing, setEditing] = useState<Message | null>(null)
+  const [attachOpen, setAttachOpen] = useState(false)
+  const [actionFor, setActionFor] = useState<Message | null>(null)
+  const [headerMenu, setHeaderMenu] = useState(false)
+  const [deleteFor, setDeleteFor] = useState<Message | null>(null)
+
+  const threadRef = useRef<HTMLDivElement>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  const myRole = conv?.participants?.find((p) => p.userId === store.me)?.role
+  const announceLocked = !!conv?.announcementMode && conv.kind === 'group' && myRole === 'member'
+
+  // Mark read on open.
+  useEffect(() => {
+    if (id) store.markRead(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
+
+  // Autoscroll to newest.
+  useLayoutEffect(() => {
+    bottomRef.current?.scrollIntoView({ block: 'end' })
+  }, [messages.length, store.state.typing[id ?? '']])
+
+  const rendered = useMemo(() => {
+    const out: React.ReactNode[] = []
+    let prevDay = ''
+    let prevAuthor = ''
+    let prevAt = 0
+    messages.forEach((m) => {
+      const dl = dayLabel(m.createdAt)
+      if (dl !== prevDay) {
+        out.push(<DaySeparator key={`d-${m.id}`} ts={m.createdAt} />)
+        prevDay = dl
+        prevAuthor = ''
+      }
+      if (m.type === 'system') {
+        out.push(<SystemMessage key={m.id} text={m.text ?? ''} />)
+        prevAuthor = ''
+        return
+      }
+      const isMine = m.authorId === store.me
+      const grouped =
+        prevAuthor === m.authorId && m.createdAt - prevAt < 5 * 60_000
+      const showSender = conv?.kind === 'group' && !isMine && !grouped
+      const replyMsg = m.replyToId ? store.state.messages[m.replyToId] : undefined
+      out.push(
+        <div id={`msg-${m.id}`} key={m.id}>
+          <ChatBubble
+            message={m}
+            author={store.state.users[m.authorId]}
+            isMine={isMine}
+            showSender={showSender}
+            grouped={grouped}
+            me={store.me}
+            replyTo={replyMsg}
+            replyAuthor={replyMsg ? store.state.users[replyMsg.authorId] : undefined}
+            onOpenActions={setActionFor}
+            onJumpToReply={(mid) => {
+              const el = document.getElementById(`msg-${mid}`)
+              el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              el?.animate([{ background: 'var(--sb-primary-soft)' }, { background: 'transparent' }], { duration: 1200 })
+            }}
+          />
+        </div>,
+      )
+      prevAuthor = m.authorId
+      prevAt = m.createdAt
+    })
+    return out
+  }, [messages, conv, store.state.messages, store.state.users, store.me])
+
+  if (!conv) {
+    return (
+      <div className="sb-fill">
+        <TopAppBar title="Conversation" onBack={back} />
+        <div className="sb-center">This conversation doesn’t exist.</div>
+      </div>
+    )
+  }
+
+  const title = conv.kind === 'group' ? conv.title ?? 'Group' : other?.name ?? 'Chat'
+  const statusLine =
+    conv.kind === 'group'
+      ? `${conv.participants?.length ?? 0} members`
+      : other?.presence === 'online'
+        ? 'online'
+        : other?.lastSeen
+          ? `last seen ${other.lastSeen}`
+          : 'offline'
+
+  const send = () => {
+    const text = draft.trim()
+    if (!text) return
+    if (editing) {
+      store.editMessage(editing.id, text)
+      setEditing(null)
+    } else {
+      store.sendMessage(id!, { type: 'text', text, replyToId: replyTo?.id })
+    }
+    setDraft('')
+    setReplyTo(null)
+  }
+
+  const attachOptions = [
+    { label: 'Gallery', icon: ImageIcon, color: 'linear-gradient(135deg,#5f69e8,#4b54d6)', onSelect: () => { store.sendMessage(id!, { type: 'image', image: { url: 'grad-3', caption: '' } }); setAttachOpen(false) } },
+    { label: 'Camera', icon: Camera, color: 'linear-gradient(135deg,#e05353,#cc3f3f)', onSelect: () => { store.sendMessage(id!, { type: 'image', image: { url: 'grad-1' } }); setAttachOpen(false) } },
+    { label: 'Document', icon: FileText, color: 'linear-gradient(135deg,#2f7ee0,#2668bd)', onSelect: () => { store.sendMessage(id!, { type: 'document', document: { name: 'Shared-notes.pdf', size: '840 KB', ext: 'PDF' } }); setAttachOpen(false) } },
+    { label: 'Location', icon: MapPin, color: 'linear-gradient(135deg,#1fa971,#178a5c)', onSelect: () => { store.sendMessage(id!, { type: 'location', location: { label: 'My location', area: 'Kathmandu, Nepal' } }); setAttachOpen(false) } },
+    { label: 'Contact', icon: ContactIcon, color: 'linear-gradient(135deg,#d9930b,#b87a09)', onSelect: () => { store.sendMessage(id!, { type: 'contact', contact: { name: 'Rojan KC', phone: '+977 9806 789 012' } }); setAttachOpen(false) } },
+    { label: 'Product', icon: ShoppingBag, color: 'linear-gradient(135deg,#6b52c9,#543da8)', onSelect: () => { store.sendMessage(id!, { type: 'product', product: { title: 'SystemBoom Tote', price: 'Rs 1,200', image: 'prod-1', seller: 'Boom Store', availability: 'In stock' } }); setAttachOpen(false) } },
+  ]
+
+  const isMineMsg = actionFor?.authorId === store.me
+
+  return (
+    <div className="sb-fill">
+      <TopAppBar
+        titleContent={
+          <button className="sb-chathead" onClick={() => navigate(`/chats/${id}/info`)}>
+            <Avatar
+              name={title}
+              kind={conv.kind === 'group' ? (conv.groupType === 'business' ? 'business' : 'group') : 'user'}
+              size="md"
+              presence={conv.kind === 'private' ? other?.presence : undefined}
+            />
+            <span className="sb-chathead__body">
+              <span className="sb-chathead__name">{title}</span>
+              <span className={statusLine === 'online' ? 'sb-chathead__status sb-chathead__status--online' : 'sb-chathead__status'}>
+                {conv.announcementMode && <Icon as={Megaphone} size={12} />}
+                {store.state.typing[id!] ? 'typing…' : statusLine}
+              </span>
+            </span>
+          </button>
+        }
+        onBack={back}
+        actions={
+          <>
+            <IconButton icon={Video} label="Video call" onClick={() => navigate(`/call/${id}?kind=video`)} />
+            <IconButton icon={Phone} label="Voice call" onClick={() => navigate(`/call/${id}?kind=voice`)} />
+            <IconButton icon={MoreVertical} label="More" onClick={() => setHeaderMenu(true)} />
+          </>
+        }
+      />
+
+      {conv.encrypted && messages.length > 0 && (
+        <div style={{ padding: '8px var(--sb-space-3) 0' }}>
+          <Banner tone="anon" icon={ShieldCheck}>
+            Messages are end-to-end encrypted. No one outside this chat can read them.
+          </Banner>
+        </div>
+      )}
+
+      <div className="sb-thread" data-scroll-region ref={threadRef}>
+        {messages.length === 0 && (
+          <div className="sb-center" style={{ flex: 1 }}>
+            <div style={{ textAlign: 'center', color: 'var(--sb-text-tertiary)' }}>
+              <Avatar name={title} kind={conv.kind === 'group' ? 'group' : 'user'} size="xl" />
+              <p style={{ marginTop: 12, fontWeight: 600, color: 'var(--sb-text)' }}>{title}</p>
+              <p style={{ fontSize: 'var(--sb-text-caption)' }}>Say hello 👋</p>
+            </div>
+          </div>
+        )}
+        {rendered}
+        {store.state.typing[id!] && <TypingBubble name={other?.name} />}
+        <div ref={bottomRef} />
+      </div>
+
+      <MessageComposer
+        value={draft}
+        onChange={setDraft}
+        onSend={send}
+        onAttach={() => setAttachOpen(true)}
+        onEmoji={() => setDraft((d) => d + '🙂')}
+        replyTo={replyTo ?? undefined}
+        replyAuthorName={replyTo ? store.state.users[replyTo.authorId]?.name : undefined}
+        onCancelReply={() => setReplyTo(null)}
+        locked={announceLocked}
+        lockedLabel="Only admins can post in Announcement Mode"
+        placeholder={editing ? 'Edit message' : 'Message'}
+      />
+
+      {/* Attachments */}
+      <BottomSheet open={attachOpen} onClose={() => setAttachOpen(false)} title="Share">
+        <AttachmentGrid options={attachOptions} />
+      </BottomSheet>
+
+      {/* Message actions */}
+      <BottomSheet open={!!actionFor} onClose={() => setActionFor(null)}>
+        {actionFor && (
+          <div>
+            <div className="sb-row" style={{ justifyContent: 'space-around', padding: '4px 0 12px' }}>
+              {QUICK_EMOJI.map((e) => (
+                <button
+                  key={e}
+                  className="sb-msg-actions__emoji"
+                  style={{ fontSize: 26 }}
+                  onClick={() => { store.react(actionFor.id, e); setActionFor(null) }}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+            <div className="sb-col" style={{ gap: 2 }}>
+              {!actionFor.deleted && (
+                <button className="sb-actionsheet__item" onClick={() => { setReplyTo(actionFor); setActionFor(null) }}>
+                  <Icon as={Reply} size="md" /> Reply
+                </button>
+              )}
+              {actionFor.type === 'text' && !actionFor.deleted && (
+                <button className="sb-actionsheet__item" onClick={() => { navigator.clipboard?.writeText(actionFor.text ?? ''); toast.show('Copied'); setActionFor(null) }}>
+                  <Icon as={Copy} size="md" /> Copy
+                </button>
+              )}
+              {!actionFor.deleted && (
+                <button className="sb-actionsheet__item" onClick={() => { toast.show('Forward opens a picker (prototype)'); setActionFor(null) }}>
+                  <Icon as={Forward} size="md" /> Forward
+                </button>
+              )}
+              <button className="sb-actionsheet__item" onClick={() => { toast.show(actionFor.pinned ? 'Unpinned' : 'Pinned message'); setActionFor(null) }}>
+                <Icon as={Pin} size="md" /> {actionFor.pinned ? 'Unpin' : 'Pin'}
+              </button>
+              <button className="sb-actionsheet__item" onClick={() => { toast.show(actionFor.starred ? 'Unstarred' : 'Starred'); setActionFor(null) }}>
+                <Icon as={Star} size="md" /> Star
+              </button>
+              {isMineMsg && actionFor.type === 'text' && !actionFor.deleted && (
+                <button className="sb-actionsheet__item" onClick={() => { setEditing(actionFor); setDraft(actionFor.text ?? ''); setActionFor(null) }}>
+                  <Icon as={Pencil} size="md" /> Edit
+                </button>
+              )}
+              {!actionFor.deleted && (
+                <button className="sb-actionsheet__item sb-actionsheet__item--danger" onClick={() => { setDeleteFor(actionFor); setActionFor(null) }}>
+                  <Icon as={Trash2} size="md" /> Delete
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </BottomSheet>
+
+      {/* Delete confirm */}
+      <ConfirmDialog
+        open={!!deleteFor}
+        onClose={() => setDeleteFor(null)}
+        onConfirm={() => { if (deleteFor) store.deleteMessage(deleteFor.id, deleteFor.authorId === store.me) }}
+        icon={Trash2}
+        tone="danger"
+        title="Delete message?"
+        description={deleteFor?.authorId === store.me ? 'This will delete the message for everyone in the chat.' : 'This will remove the message from your view.'}
+        confirmLabel="Delete"
+      />
+
+      {/* Header overflow */}
+      <ActionSheet
+        open={headerMenu}
+        onClose={() => setHeaderMenu(false)}
+        title={title}
+        actions={[
+          { label: 'View info', icon: Info, onSelect: () => navigate(`/chats/${id}/info`) },
+          { label: 'Search in chat', icon: Search, onSelect: () => navigate(`/chats/${id}/search`) },
+          { label: conv.muted ? 'Unmute' : 'Mute', icon: MoreVertical, onSelect: () => { store.toggleMute(id!); toast.show(conv.muted ? 'Unmuted' : 'Muted') } },
+        ]}
+      />
+    </div>
+  )
+}

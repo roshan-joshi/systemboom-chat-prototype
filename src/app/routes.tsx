@@ -15,12 +15,22 @@ import { HomeScreen } from '@/screens/HomeScreen'
 import { ProfileScreen } from '@/screens/ProfileScreen'
 import { DesignSystemScreen } from '@/screens/DesignSystemScreen'
 import { NotFoundScreen } from '@/screens/NotFoundScreen'
+import { ChatListScreen } from '@/screens/ChatListScreen'
+import { ConversationScreen } from '@/screens/ConversationScreen'
+import { NewChatScreen, CreateGroupScreen } from '@/screens/NewChatScreen'
 import {
-  ChatsScreen,
-  CallsScreen,
-  MarketplaceScreen,
-  AnonymousScreen,
-} from '@/screens/destinations'
+  ChatInfoScreen,
+  SharedMediaScreen,
+  PinnedMessagesScreen,
+  ChatSearchScreen,
+} from '@/screens/ChatDetailScreens'
+import { CallHistoryScreen, CallScreen } from '@/screens/CallsScreens'
+import {
+  NotificationsScreen,
+  SettingsScreen,
+  SettingsDetailScreen,
+} from '@/screens/SystemScreens'
+import { MarketplaceScreen, AnonymousScreen } from '@/screens/destinations'
 
 export type Chrome = 'full' | 'app'
 
@@ -32,6 +42,8 @@ export interface RouteDef {
   chrome: Chrome
   /** Which Level-1 nav destination owns this screen (for active state). */
   tab?: string
+  /** Pushed/detail screen — hide bottom nav on mobile so content is the hero. */
+  deep?: boolean
 }
 
 /*
@@ -44,13 +56,34 @@ export const ROUTES: RouteDef[] = [
   { id: 'SC-002', pattern: '/welcome', element: <WelcomeScreen />, chrome: 'full' },
 
   { id: 'SC-003', pattern: '/home', element: <HomeScreen />, chrome: 'app', tab: 'home' },
-  { id: 'SC-020', pattern: '/chats', element: <ChatsScreen />, chrome: 'app', tab: 'chats' },
-  { id: 'SC-063', pattern: '/calls', element: <CallsScreen />, chrome: 'app', tab: 'calls' },
+
+  // Registered Communication
+  { id: 'SC-020', pattern: '/chats', element: <ChatListScreen />, chrome: 'app', tab: 'chats' },
+  { id: 'SC-020', pattern: '/archived', element: <ChatListScreen archived />, chrome: 'app', tab: 'chats', deep: true },
+  { id: 'SC-023', pattern: '/new-chat', element: <NewChatScreen />, chrome: 'app', tab: 'chats', deep: true },
+  { id: 'SC-023', pattern: '/new-group', element: <CreateGroupScreen />, chrome: 'app', tab: 'chats', deep: true },
+  { id: 'SC-021', pattern: '/chats/:id', element: <ConversationScreen />, chrome: 'app', tab: 'chats', deep: true },
+  { id: 'SC-025', pattern: '/chats/:id/info', element: <ChatInfoScreen />, chrome: 'app', tab: 'chats', deep: true },
+  { id: 'SC-026', pattern: '/chats/:id/media', element: <SharedMediaScreen />, chrome: 'app', tab: 'chats', deep: true },
+  { id: 'SC-027', pattern: '/chats/:id/pinned', element: <PinnedMessagesScreen />, chrome: 'app', tab: 'chats', deep: true },
+  { id: 'SC-024', pattern: '/chats/:id/search', element: <ChatSearchScreen />, chrome: 'app', tab: 'chats', deep: true },
+
+  // Calls
+  { id: 'SC-063', pattern: '/calls', element: <CallHistoryScreen />, chrome: 'app', tab: 'calls' },
+  { id: 'SC-061', pattern: '/call/:id', element: <CallScreen />, chrome: 'full' },
+
   { id: 'SC-080', pattern: '/marketplace', element: <MarketplaceScreen />, chrome: 'app', tab: 'marketplace' },
   { id: 'SC-100', pattern: '/profile', element: <ProfileScreen />, chrome: 'app', tab: 'profile' },
 
+  // Settings
+  { id: 'SC-101', pattern: '/settings', element: <SettingsScreen />, chrome: 'app', tab: 'profile', deep: true },
+  { id: 'SC-102', pattern: '/settings/:section', element: <SettingsDetailScreen />, chrome: 'app', tab: 'profile', deep: true },
+
+  // Notifications inbox (global; settings live at /settings/notifications = SC-104)
+  { id: 'PT-notifications', pattern: '/notifications', element: <NotificationsScreen />, chrome: 'app', deep: true },
+
   { id: 'SC-040', pattern: '/anonymous', element: <AnonymousScreen />, chrome: 'app' },
-  { id: 'PT-design', pattern: '/design', element: <DesignSystemScreen />, chrome: 'app' },
+  { id: 'PT-design', pattern: '/design', element: <DesignSystemScreen />, chrome: 'app', deep: true },
 ]
 
 export interface ResolvedRoute {

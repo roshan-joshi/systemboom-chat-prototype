@@ -46,10 +46,17 @@ src/
 | Phase | Scope | Status |
 |-------|-------|--------|
 | 1 | Foundation — nav, routing, theme, responsive, dark mode, components, animation, a11y | ✅ Complete |
-| 2 | Registered communication — chat list, private/group chat, search, calls, notifications, settings | ⏳ Planned |
+| 2 | Registered communication — chat list, private/group chat, new chat, search, calls, notifications, settings | ✅ Complete |
 | 3 | Anonymous communication — identity, QR pairing, anonymous chats, switching | ⏳ Planned |
 | 4 | Conversation commerce — marketplace, product, order, payment, tracking | ⏳ Planned |
 | 5 | Polish — motion, transitions, empty/loading/error/offline states | ⏳ Planned |
+
+### Phase 2 highlights
+
+- **State store** (`src/data/`) — mock users, conversations, messages (all PS-001 content types), calls, notifications; optimistic send with status progression + mock replies.
+- **Conversation experience** (SC-021/022) — text, image, video, voice, document, contact, location, product card & link messages; reply, react, copy, forward, edit, delete; day separators, sender colours, typing indicator, read receipts; announcement-mode lock for group members.
+- **Chat list** (SC-020) with All/Unread/Groups, pin/mute/archive, search; **New chat** + **Create group** (SC-023); **Chat info / Shared media / Pinned / In-chat search** (SC-025/026/027/024); **Calls** history + in-call UI (SC-063/061/062); **Notifications**; **Settings** with Privacy/Security/Notifications/Devices (SC-101–105).
+- Conversations hide the bottom nav on mobile so the conversation stays the hero (PD-047).
 
 ## Prototype Assumptions (Phase 1)
 

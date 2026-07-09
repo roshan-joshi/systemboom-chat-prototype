@@ -84,6 +84,12 @@ export function useRouter(): RouterContextValue {
   return ctx
 }
 
+/** Extract params for a pattern against the current path (e.g. '/chats/:id'). */
+export function useParams(pattern: string): Record<string, string> {
+  const { path } = useRouter()
+  return matchPath(pattern, path) ?? {}
+}
+
 /**
  * Match a path pattern like "/chats/:id" against a concrete path.
  * Returns extracted params, or null if no match.

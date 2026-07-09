@@ -14,7 +14,9 @@
       "Bash(git push *)",
       "Bash(gh api *)",
       "Bash(gh run *)",
-      "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Update local Claude allowlist \\(permit gh run commands\\) *)"
+      "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Update local Claude allowlist \\(permit gh run commands\\) *)",
+      "Bash(perl -0pi -e ' *)",
+      "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Phase 2 — Registered Communication *)"
     ]
   }
 }
