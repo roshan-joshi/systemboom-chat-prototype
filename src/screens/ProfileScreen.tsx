@@ -111,7 +111,7 @@ export function ProfileScreen() {
                         width: 34,
                         height: 10,
                         borderRadius: 6,
-                        background: 'var(--sb-indigo-500)',
+                        background: 'var(--sb-brand)',
                       }}
                     />
                   )}

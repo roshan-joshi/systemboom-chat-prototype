@@ -122,15 +122,15 @@ export function CallScreen() {
         justifyContent: 'space-between',
         padding: 'var(--sb-space-8) var(--sb-space-6)',
         background: videoOn
-          ? 'linear-gradient(160deg,#20242d,#0b0e14)'
-          : 'radial-gradient(120% 80% at 50% 0%, var(--sb-indigo-800), var(--sb-neutral-950))',
+          ? 'linear-gradient(160deg,#1a222c,#090d11)'
+          : 'radial-gradient(130% 82% at 50% -8%, #3a0f0a, var(--sb-ink-950))',
         color: '#fff',
         textAlign: 'center',
       }}
     >
       {/* self PiP for video */}
       {videoOn && (
-        <div style={{ position: 'absolute', top: 20, right: 20, width: 96, height: 132, borderRadius: 16, background: 'linear-gradient(135deg,#4b54d6,#0fb0aa)', border: '2px solid rgba(255,255,255,0.3)' }} />
+        <div style={{ position: 'absolute', top: 20, right: 20, width: 96, height: 132, borderRadius: 16, background: 'linear-gradient(135deg,#2d688f,#1a222c)', border: '2px solid rgba(255,255,255,0.3)' }} />
       )}
 
       <div style={{ marginTop: 'var(--sb-space-8)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>

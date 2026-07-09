@@ -797,7 +797,7 @@ textarea.sb-input__control {
 .sb-toast__icon--error { color: var(--sb-error); }
 .sb-toast__msg { flex: 1; font-size: var(--sb-text-caption); }
 .sb-toast__action {
-  color: var(--sb-indigo-300);
+  color: #ff8b7b;
   font-weight: var(--sb-weight-semibold);
   font-size: var(--sb-text-caption);
   padding: 4px 6px;

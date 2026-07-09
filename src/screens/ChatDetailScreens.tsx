@@ -95,7 +95,7 @@ export function ChatInfoScreen() {
           </div>
 
           {conv.encrypted && (
-            <Banner tone="anon" icon={ShieldCheck}>
+            <Banner tone="info" icon={ShieldCheck}>
               End-to-end encrypted. Messages, calls and media stay between members.
             </Banner>
           )}
@@ -259,7 +259,7 @@ export function SharedMediaScreen() {
           media.length ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
               {media.map((m) => (
-                <div key={m.id} style={{ aspectRatio: '1', borderRadius: 8, background: 'linear-gradient(135deg,#5f69e8,#0fb0aa)', display: 'grid', placeItems: 'center', color: '#fff' }}>
+                <div key={m.id} style={{ aspectRatio: '1', borderRadius: 8, background: 'linear-gradient(135deg,#d92a20,#f0a007)', display: 'grid', placeItems: 'center', color: '#fff' }}>
                   <Icon as={ImageIcon} size="md" />
                 </div>
               ))}

@@ -161,12 +161,12 @@ export function ConversationScreen() {
   }
 
   const attachOptions = [
-    { label: 'Gallery', icon: ImageIcon, color: 'linear-gradient(135deg,#5f69e8,#4b54d6)', onSelect: () => { store.sendMessage(id!, { type: 'image', image: { url: 'grad-3', caption: '' } }); setAttachOpen(false) } },
+    { label: 'Gallery', icon: ImageIcon, color: 'linear-gradient(135deg,#e5392b,#b21c13)', onSelect: () => { store.sendMessage(id!, { type: 'image', image: { url: 'grad-3', caption: '' } }); setAttachOpen(false) } },
     { label: 'Camera', icon: Camera, color: 'linear-gradient(135deg,#e05353,#cc3f3f)', onSelect: () => { store.sendMessage(id!, { type: 'image', image: { url: 'grad-1' } }); setAttachOpen(false) } },
     { label: 'Document', icon: FileText, color: 'linear-gradient(135deg,#2f7ee0,#2668bd)', onSelect: () => { store.sendMessage(id!, { type: 'document', document: { name: 'Shared-notes.pdf', size: '840 KB', ext: 'PDF' } }); setAttachOpen(false) } },
     { label: 'Location', icon: MapPin, color: 'linear-gradient(135deg,#1fa971,#178a5c)', onSelect: () => { store.sendMessage(id!, { type: 'location', location: { label: 'My location', area: 'Kathmandu, Nepal' } }); setAttachOpen(false) } },
     { label: 'Contact', icon: ContactIcon, color: 'linear-gradient(135deg,#d9930b,#b87a09)', onSelect: () => { store.sendMessage(id!, { type: 'contact', contact: { name: 'Rojan KC', phone: '+977 9806 789 012' } }); setAttachOpen(false) } },
-    { label: 'Product', icon: ShoppingBag, color: 'linear-gradient(135deg,#6b52c9,#543da8)', onSelect: () => { store.sendMessage(id!, { type: 'product', product: { title: 'SystemBoom Tote', price: 'Rs 1,200', image: 'prod-1', seller: 'Boom Store', availability: 'In stock' } }); setAttachOpen(false) } },
+    { label: 'Product', icon: ShoppingBag, color: 'linear-gradient(135deg,#6b52c9,#4a3a8f)', onSelect: () => { store.sendMessage(id!, { type: 'product', product: { title: 'SystemBoom Tote', price: 'Rs 1,200', image: 'prod-1', seller: 'Boom Store', availability: 'In stock' } }); setAttachOpen(false) } },
   ]
 
   const isMineMsg = actionFor?.authorId === store.me
@@ -203,7 +203,7 @@ export function ConversationScreen() {
 
       {conv.encrypted && messages.length > 0 && (
         <div style={{ padding: '8px var(--sb-space-3) 0' }}>
-          <Banner tone="anon" icon={ShieldCheck}>
+          <Banner tone="info" icon={ShieldCheck}>
             Messages are end-to-end encrypted. No one outside this chat can read them.
           </Banner>
         </div>

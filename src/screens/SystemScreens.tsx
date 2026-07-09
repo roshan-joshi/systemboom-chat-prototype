@@ -230,7 +230,7 @@ export function SettingsDetailScreen() {
 
           {section === 'security' && (
             <>
-              <Banner tone="anon" icon={ShieldCheck}>Your personal chats and calls are end-to-end encrypted by default.</Banner>
+              <Banner tone="info" icon={ShieldCheck}>Your personal chats and calls are end-to-end encrypted by default.</Banner>
               <div className="sb-settings-group">
                 <ToggleRow icon={KeyRound} title="Two-step verification" sub="Add a PIN for extra protection" checked={twoStep} onChange={(v) => { setTwoStep(v); toast.show(v ? 'Two-step verification on' : 'Two-step verification off') }} />
               </div>

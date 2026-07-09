@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useRouter } from '@/lib/router'
-import { Card, Icon, Badge } from '@/components'
+import { Card, Icon, Badge, BrandMark } from '@/components'
 
 interface Tile {
   title: string
@@ -36,9 +36,12 @@ export function HomeScreen() {
   return (
     <div className="sb-page">
       <div className="sb-content sb-block" style={{ paddingTop: 'var(--sb-space-5)' }}>
-        <div>
-          <p className="sb-section-label">{greeting}</p>
-          <h2 className="sb-hub__greeting">Welcome to SystemBoom</h2>
+        <div className="sb-row sb-gap-3" style={{ alignItems: 'center' }}>
+          <BrandMark size={44} />
+          <div>
+            <p className="sb-section-label">{greeting}</p>
+            <h2 className="sb-hub__greeting">Welcome to SystemBoom</h2>
+          </div>
         </div>
 
         {/* Spotlight — conversation first */}

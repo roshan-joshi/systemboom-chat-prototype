@@ -36,12 +36,12 @@ import { IconButton } from './primitives'
 
 /* ---------- gradient placeholders (offline-safe stand-ins for media) ---------- */
 const GRAD: Record<string, string> = {
-  'grad-1': 'linear-gradient(135deg,#5f69e8,#0fb0aa)',
-  'grad-2': 'linear-gradient(135deg,#d9930b,#e05353)',
-  'grad-3': 'linear-gradient(135deg,#6b52c9,#2f7ee0)',
-  'prod-1': 'linear-gradient(135deg,#4b54d6,#6b52c9)',
+  'grad-1': 'linear-gradient(135deg,#d92a20,#f0a007)',
+  'grad-2': 'linear-gradient(135deg,#f0a007,#d92a20)',
+  'grad-3': 'linear-gradient(135deg,#2d688f,#12303f)',
+  'prod-1': 'linear-gradient(135deg,#d92a20,#3a0f0a)',
 }
-const grad = (key?: string) => GRAD[key ?? ''] ?? 'linear-gradient(135deg,#7c8496,#414856)'
+const grad = (key?: string) => GRAD[key ?? ''] ?? 'linear-gradient(135deg,#55606e,#1c2530)'
 
 /* ---------------- Status ticks ---------------- */
 export function StatusTicks({ status }: { status: MessageStatus }) {
@@ -542,7 +542,7 @@ export function previewOf(m: Message): string {
   }
 }
 
-const SENDER_COLORS = ['#4b54d6', '#0a7c78', '#b87a09', '#cc3f3f', '#543da8', '#2668bd', '#178a5c', '#c2568f']
+const SENDER_COLORS = ['#d33124', '#2d6f9c', '#b7791a', '#b83280', '#3f8f66', '#6b57c9', '#c85a3a', '#4a7a99']
 function senderColor(name: string): string {
   let h = 0
   for (let i = 0; i < name.length; i++) h = (h << 5) - h + name.charCodeAt(i)

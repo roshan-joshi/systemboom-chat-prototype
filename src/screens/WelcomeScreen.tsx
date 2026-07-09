@@ -1,6 +1,6 @@
 import { MessageSquare, ShieldCheck, VenetianMask } from 'lucide-react'
 import { useRouter } from '@/lib/router'
-import { Button, BrandMark, Icon } from '@/components'
+import { Button, BrandLogo, Icon } from '@/components'
 
 /* SC-002 — Welcome. Establishes the promise, offers entry into the product.
    (Prototype: no real auth — both actions lead into the experience.) */
@@ -21,7 +21,7 @@ export function WelcomeScreen() {
       <div className="sb-welcome__glow" aria-hidden />
 
       <div className="sb-welcome__hero">
-        <BrandMark size={64} />
+        <BrandLogo height={48} />
         <h1 className="sb-welcome__title">
           Where conversation <em>becomes action.</em>
         </h1>

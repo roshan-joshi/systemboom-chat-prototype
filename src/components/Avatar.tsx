@@ -7,14 +7,14 @@ export type Presence = 'online' | 'away' | 'offline'
 
 /* Stable, calm avatar palette (paired bg/fg) assigned deterministically by name. */
 const PALETTE = [
-  ['#4b54d6', '#ffffff'],
-  ['#0fb0aa', '#ffffff'],
-  ['#d9930b', '#ffffff'],
-  ['#e05353', '#ffffff'],
-  ['#6b52c9', '#ffffff'],
-  ['#2f7ee0', '#ffffff'],
+  ['#c9271c', '#ffffff'],
+  ['#2d688f', '#ffffff'],
+  ['#b07d10', '#ffffff'],
   ['#178a5c', '#ffffff'],
-  ['#c2568f', '#ffffff'],
+  ['#6b52c9', '#ffffff'],
+  ['#2668bd', '#ffffff'],
+  ['#0a7c78', '#ffffff'],
+  ['#b83280', '#ffffff'],
 ]
 
 const SIZES: Record<string, number> = {

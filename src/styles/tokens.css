@@ -28,17 +28,38 @@
   --sb-neutral-900: #171b22;
   --sb-neutral-950: #0b0e14;
 
-  /* ---------- Primitive: Brand indigo (SystemBoom signature) ---------- */
-  --sb-indigo-50: #eef0fe;
-  --sb-indigo-100: #e0e3fd;
-  --sb-indigo-200: #c5cafb;
-  --sb-indigo-300: #a0a7f5;
-  --sb-indigo-400: #7c85ef;
-  --sb-indigo-500: #5f69e8;
-  --sb-indigo-600: #4b54d6;
-  --sb-indigo-700: #3d45b4;
-  --sb-indigo-800: #333a90;
-  --sb-indigo-900: #2c3175;
+  /* ---------- Primitive: Brand RED — the SystemBoom "explosion" ---------- */
+  --sb-red-50: #fdecea;
+  --sb-red-100: #fbd9d4;
+  --sb-red-200: #f6b3a9;
+  --sb-red-300: #ef8878;
+  --sb-red-400: #ea6b5b;   /* brand-lt (#F87A63 family) */
+  --sb-red-500: #e5392b;
+  --sb-red-600: #d92a20;   /* true brand (#D92A20) */
+  --sb-red-700: #b21c13;   /* brand-2 (#AE1C14) */
+  --sb-red-800: #8e140d;
+  --sb-red-900: #6f0f0a;
+
+  /* ---------- Primitive: Brand GOLD — the lit fuse / spark ---------- */
+  --sb-gold-300: #ffe08a;
+  --sb-gold-400: #ffc24d;
+  --sb-gold-500: #f0a007;
+  --sb-gold-600: #c88a00;
+  --sb-gold-700: #9a6a00;
+
+  /* ---------- Primitive: Steel blue — quiet secondary accent ---------- */
+  --sb-steel-300: #a9c6dc;
+  --sb-steel-400: #86b3d6;
+  --sb-steel-500: #2d688f;
+  --sb-steel-600: #23557a;
+
+  /* ---------- Primitive: Ink — the bomb-black foundation ---------- */
+  --sb-ink-950: #090d11;
+  --sb-ink-900: #0e1318;
+  --sb-ink-850: #151b23;
+  --sb-ink-800: #1a222c;
+  --sb-ink-750: #1f2937;
+  --sb-ink-700: #2a323c;
 
   /* ---------- Primitive: Semantic hues ---------- */
   --sb-green-500: #1fa971;
@@ -160,50 +181,56 @@
   --sb-border-strong: var(--sb-neutral-300);
   --sb-border-subtle: var(--sb-neutral-150);
 
-  /* Text */
-  --sb-text: var(--sb-neutral-900);
-  --sb-text-secondary: var(--sb-neutral-600);
-  --sb-text-tertiary: var(--sb-neutral-500);
+  /* Text — slate ink (matches SystemBoom Photo Timeline) */
+  --sb-text: #1c2530;
+  --sb-text-secondary: #55606e;
+  --sb-text-tertiary: #7a8896;
   --sb-text-disabled: var(--sb-neutral-400);
   --sb-text-on-primary: var(--sb-neutral-0);
   --sb-text-inverse: var(--sb-neutral-0);
 
-  /* Primary (brand / interactive) */
-  --sb-primary: var(--sb-indigo-600);
-  --sb-primary-hover: var(--sb-indigo-700);
-  --sb-primary-active: var(--sb-indigo-800);
-  --sb-primary-soft: var(--sb-indigo-50);
-  --sb-primary-soft-hover: var(--sb-indigo-100);
-  --sb-on-primary-soft: var(--sb-indigo-700);
+  /* Primary (brand / interactive) — SystemBoom red, deepened for AA contrast */
+  --sb-primary: #ce2418;
+  --sb-primary-hover: var(--sb-red-700);
+  --sb-primary-active: var(--sb-red-800);
+  --sb-primary-soft: var(--sb-red-50);
+  --sb-primary-soft-hover: var(--sb-red-100);
+  --sb-on-primary-soft: var(--sb-red-700);
 
-  /* Secondary (calm supportive accent) */
-  --sb-secondary: var(--sb-teal-500);
-  --sb-secondary-soft: #d5f4f2;
-  --sb-on-secondary-soft: #0a7c78;
+  /* Brand accents */
+  --sb-brand: var(--sb-red-600);        /* pure logo red for fills/glow */
+  --sb-gold: var(--sb-gold-600);        /* warm highlight (fuse) */
+  --sb-gold-soft: #fbeecd;
+  --sb-on-gold-soft: #8a5c05;
+
+  /* Secondary (warm gold highlight) */
+  --sb-secondary: var(--sb-gold-600);
+  --sb-secondary-soft: #fbeecd;
+  --sb-on-secondary-soft: #8a5c05;
 
   /* Semantic feedback */
   --sb-success: var(--sb-green-600);
   --sb-success-soft: var(--sb-green-100);
   --sb-on-success-soft: var(--sb-green-600);
-  --sb-warning: var(--sb-amber-600);
-  --sb-warning-soft: var(--sb-amber-100);
+  --sb-warning: var(--sb-gold-700);
+  --sb-warning-soft: var(--sb-gold-soft);
   --sb-on-warning-soft: #8a5c05;
-  --sb-error: var(--sb-red-600);
+  --sb-error: #c62a1e;
   --sb-error-soft: var(--sb-red-100);
-  --sb-on-error-soft: var(--sb-red-600);
-  --sb-info: var(--sb-blue-600);
-  --sb-info-soft: var(--sb-blue-100);
-  --sb-on-info-soft: var(--sb-blue-600);
+  --sb-on-error-soft: var(--sb-red-700);
+  --sb-info: var(--sb-steel-500);
+  --sb-info-soft: #dceaf4;
+  --sb-on-info-soft: var(--sb-steel-600);
 
   /* Presence / status */
   --sb-online: var(--sb-green-500);
-  --sb-away: var(--sb-amber-500);
+  --sb-away: var(--sb-gold-500);
 
-  /* Chat bubbles */
-  --sb-bubble-out: var(--sb-indigo-600);
+  /* Chat bubbles — outgoing is the brand's signature moment (deep red, AA white) */
+  --sb-bubble-out: #c9271c;
   --sb-bubble-out-text: var(--sb-neutral-0);
   --sb-bubble-in: var(--sb-neutral-0);
-  --sb-bubble-in-text: var(--sb-neutral-900);
+  --sb-bubble-in-text: #1c2530;
   --sb-bubble-in-border: var(--sb-neutral-200);
 
   /* Anonymous mode signature (distinct, privacy-forward hue) */
@@ -217,7 +244,7 @@
   --sb-shadow-e2: 0 2px 6px rgba(16, 24, 40, 0.07), 0 4px 12px rgba(16, 24, 40, 0.05);
   --sb-shadow-e3: 0 8px 24px rgba(16, 24, 40, 0.1), 0 2px 6px rgba(16, 24, 40, 0.06);
   --sb-shadow-e4: 0 18px 48px rgba(16, 24, 40, 0.16), 0 6px 16px rgba(16, 24, 40, 0.08);
-  --sb-focus-ring: 0 0 0 3px var(--sb-indigo-200);
+  --sb-focus-ring: 0 0 0 3px rgba(206, 36, 24, 0.32);
 }
 
 /* =========================================================
@@ -226,58 +253,65 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --sb-bg: var(--sb-neutral-950);
-  --sb-bg-sunken: #070a0f;
-  --sb-surface: var(--sb-neutral-900);
-  --sb-surface-raised: var(--sb-neutral-850);
-  --sb-surface-muted: var(--sb-neutral-850);
-  --sb-surface-hover: var(--sb-neutral-850);
-  --sb-surface-active: var(--sb-neutral-800);
-  --sb-scrim: rgba(0, 0, 0, 0.6);
+  /* Premium bomb-black foundation (logo + Photo Timeline dark #0E1318) */
+  --sb-bg: var(--sb-ink-900);
+  --sb-bg-sunken: var(--sb-ink-950);
+  --sb-surface: var(--sb-ink-850);
+  --sb-surface-raised: var(--sb-ink-800);
+  --sb-surface-muted: var(--sb-ink-800);
+  --sb-surface-hover: var(--sb-ink-750);
+  --sb-surface-active: #232c38;
+  --sb-scrim: rgba(0, 0, 0, 0.64);
 
-  --sb-border: #2b313d;
-  --sb-border-strong: #3a414f;
-  --sb-border-subtle: #232833;
+  --sb-border: #2a323c;
+  --sb-border-strong: #3a434f;
+  --sb-border-subtle: #212a33;
 
-  --sb-text: #f2f4f8;
-  --sb-text-secondary: #a7afbe;
-  --sb-text-tertiary: #7c8496;
+  --sb-text: #e7ebf2;
+  --sb-text-secondary: #9fb0bf;
+  --sb-text-tertiary: #7a8a99;
   --sb-text-disabled: #565e6d;
   --sb-text-on-primary: #ffffff;
-  --sb-text-inverse: var(--sb-neutral-950);
+  --sb-text-inverse: var(--sb-ink-950);
 
-  --sb-primary: var(--sb-indigo-400);
-  --sb-primary-hover: var(--sb-indigo-300);
-  --sb-primary-active: var(--sb-indigo-200);
-  --sb-primary-soft: rgba(124, 133, 239, 0.16);
-  --sb-primary-soft-hover: rgba(124, 133, 239, 0.24);
-  --sb-on-primary-soft: var(--sb-indigo-300);
+  /* Red works as fill (white text) and as accent on near-black */
+  --sb-primary: #e5392b;
+  --sb-primary-hover: #f0503f;
+  --sb-primary-active: #f87a63;
+  --sb-primary-soft: rgba(229, 57, 43, 0.18);
+  --sb-primary-soft-hover: rgba(229, 57, 43, 0.28);
+  --sb-on-primary-soft: #ff7b6b;
 
-  --sb-secondary: var(--sb-teal-500);
-  --sb-secondary-soft: rgba(15, 176, 170, 0.18);
-  --sb-on-secondary-soft: #4fd6d0;
+  --sb-brand: #e5392b;
+  --sb-gold: #ffc24d;
+  --sb-gold-soft: rgba(255, 194, 77, 0.18);
+  --sb-on-gold-soft: #ffce6b;
+
+  --sb-secondary: #ffc24d;
+  --sb-secondary-soft: rgba(255, 194, 77, 0.18);
+  --sb-on-secondary-soft: #ffce6b;
 
   --sb-success: #34c98a;
   --sb-success-soft: rgba(31, 169, 113, 0.18);
   --sb-on-success-soft: #4fd6a0;
-  --sb-warning: #e5a83a;
-  --sb-warning-soft: rgba(217, 147, 11, 0.18);
-  --sb-on-warning-soft: #eab654;
-  --sb-error: #f07272;
-  --sb-error-soft: rgba(224, 83, 83, 0.18);
-  --sb-on-error-soft: #f28b8b;
-  --sb-info: #5b9bf0;
-  --sb-info-soft: rgba(47, 126, 224, 0.18);
-  --sb-on-info-soft: #79aef3;
+  --sb-warning: #ffc24d;
+  --sb-warning-soft: rgba(255, 194, 77, 0.16);
+  --sb-on-warning-soft: #ffce6b;
+  --sb-error: #f0503f;
+  --sb-error-soft: rgba(229, 57, 43, 0.18);
+  --sb-on-error-soft: #ff8b7b;
+  --sb-info: #86b3d6;
+  --sb-info-soft: rgba(134, 179, 214, 0.16);
+  --sb-on-info-soft: #a9c6dc;
 
   --sb-online: #34c98a;
-  --sb-away: #e5a83a;
+  --sb-away: #ffc24d;
 
-  --sb-bubble-out: var(--sb-indigo-600);
+  --sb-bubble-out: #d92a20;
   --sb-bubble-out-text: #ffffff;
-  --sb-bubble-in: var(--sb-neutral-850);
-  --sb-bubble-in-text: #f2f4f8;
-  --sb-bubble-in-border: #2b313d;
+  --sb-bubble-in: var(--sb-ink-800);
+  --sb-bubble-in-text: #e7ebf2;
+  --sb-bubble-in-border: #2a323c;
 
   --sb-anon: #a48bff;
   --sb-anon-soft: rgba(139, 111, 233, 0.2);
@@ -288,7 +322,7 @@
   --sb-shadow-e2: 0 2px 8px rgba(0, 0, 0, 0.44), 0 4px 12px rgba(0, 0, 0, 0.3);
   --sb-shadow-e3: 0 10px 28px rgba(0, 0, 0, 0.5);
   --sb-shadow-e4: 0 20px 52px rgba(0, 0, 0, 0.6);
-  --sb-focus-ring: 0 0 0 3px rgba(124, 133, 239, 0.5);
+  --sb-focus-ring: 0 0 0 3px rgba(229, 57, 43, 0.5);
 }
 
 /* Respect users who prefer reduced motion (DS-001 Accessibility, DS-002 motion) */
