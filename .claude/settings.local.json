@@ -5,7 +5,13 @@
       "Read(//Users/roshan/systemboom-chat/**)",
       "Bash(npm install *)",
       "Bash(npx tsc *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(gh repo *)",
+      "Bash(npx vite *)",
+      "Bash(node /private/tmp/claude-501/-Users-roshan-systemboom-chat-protoytpe/9f1b5fcb-3c6c-4285-bbd9-fe7590780c0f/scratchpad/mkartifact.mjs)",
+      "Bash(git add *)",
+      "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Add single-file build for browsable hosting *)",
+      "Bash(git push *)"
     ]
   }
 }
