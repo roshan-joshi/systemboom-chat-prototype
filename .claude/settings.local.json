@@ -12,7 +12,9 @@
       "Bash(git add *)",
       "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Add single-file build for browsable hosting *)",
       "Bash(git push *)",
-      "Bash(gh api *)"
+      "Bash(gh api *)",
+      "Bash(gh run *)",
+      "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Update local Claude allowlist \\(permit gh run commands\\) *)"
     ]
   }
 }
