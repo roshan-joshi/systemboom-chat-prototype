@@ -163,6 +163,91 @@ export const CALLS: CallRecord[] = [
   { id: 'call6', userId: 'u_maya', direction: 'incoming', kind: 'video', at: ago(4 * DAY), duration: '24:11' },
 ]
 
+/* ==========================================================================
+   ANONYMOUS COMMUNICATION (PS-004 / PS-006) — separate environment (PD-033)
+   ========================================================================== */
+
+export const ANON_ADJECTIVES = ['Crimson', 'Violet', 'Silent', 'Midnight', 'Amber', 'Cobalt', 'Ember', 'Shadow', 'Lunar', 'Ivory', 'Onyx', 'Scarlet']
+export const ANON_ANIMALS = ['Fox', 'Heron', 'Falcon', 'Otter', 'Wolf', 'Cipher', 'Raven', 'Lynx', 'Moth', 'Owl', 'Koi', 'Hawk']
+
+/** Deterministic hex string from a seed (mock public-key material). */
+function seededHex(seed: string, len: number): string {
+  let h = 2166136261
+  let out = ''
+  for (let i = 0; i < len; i++) {
+    h ^= seed.charCodeAt(i % seed.length) + i * 131
+    h = Math.imul(h, 16777619) >>> 0
+    out += '0123456789ABCDEF'[(h >>> (i % 24)) & 15]
+  }
+  return out
+}
+
+/** Group a hex string into fingerprint blocks: "A1B2 C3D4 …". */
+export function toFingerprint(hex: string): string {
+  return (hex.match(/.{1,4}/g) ?? []).slice(0, 8).join(' ')
+}
+
+/** Build the shareable public key + fingerprint + session id for a seed. */
+export function keyMaterial(seed: string) {
+  const publicKey = seededHex(seed, 64)
+  return {
+    publicKey,
+    fingerprint: toFingerprint(publicKey),
+    sessionId: 'SB-' + seededHex(seed + 'sid', 6),
+  }
+}
+
+// The device owner's own anonymous identity (active by default).
+export const MY_ANON = {
+  id: 'anon-me',
+  name: 'Amber Falcon 4821',
+  ...keyMaterial('amber-falcon-4821'),
+  createdAt: NOW - 3 * DAY,
+}
+
+// Anonymous contacts — known only by public key + temporary identity.
+const ANON_USERS: Record<string, User> = {
+  a_heron: { id: 'a_heron', name: 'Silent Heron 2290', presence: 'online', anon: true, ...keyMaterial('silent-heron-2290') },
+  a_cipher: { id: 'a_cipher', name: 'Violet Cipher 7731', presence: 'away', lastSeen: '20 min ago', anon: true, ...keyMaterial('violet-cipher-7731') },
+  a_raven: { id: 'a_raven', name: 'Onyx Raven 0518', presence: 'offline', anon: true, ...keyMaterial('onyx-raven-0518') },
+  a_moth: { id: 'a_moth', name: 'Lunar Moth 3364', presence: 'online', anon: true, ...keyMaterial('lunar-moth-3364') },
+}
+Object.assign(USERS, ANON_USERS)
+
+const AT_HERON = build('ac_heron', [
+  { authorId: 'a_heron', type: 'system', text: 'Identities exchanged via QR. This conversation is end-to-end encrypted.', at: ago(2 * HR) },
+  { authorId: 'a_heron', type: 'text', text: 'Hey — got your public key from the QR. This channel is anonymous, right?', at: ago(2 * HR - 60_000) },
+  { authorId: ME, type: 'text', text: 'Yes. Neither of us can see the other’s real identity.', at: ago(2 * HR - 3 * MIN) },
+  { authorId: 'a_heron', type: 'text', text: 'Perfect. Sharing the draft — feel free to be blunt 🙂', at: ago(90 * MIN) },
+  { authorId: 'a_heron', type: 'document', document: { name: 'proposal-v3.pdf', size: '1.2 MB', ext: 'PDF' }, at: ago(88 * MIN) },
+  { authorId: ME, type: 'text', text: 'Reading now. Thanks for keeping this off the record.', at: ago(12 * MIN) },
+])
+
+const AT_CIPHER = build('ac_cipher', [
+  { authorId: 'a_cipher', type: 'system', text: 'This conversation is end-to-end encrypted.', at: ago(1 * DAY) },
+  { authorId: 'a_cipher', type: 'text', text: 'Whistleblower channel — please verify my fingerprint before we continue.', at: ago(1 * DAY - 2 * MIN) },
+  { authorId: ME, type: 'text', text: 'Verified ✅ Fingerprints match.', at: ago(23 * HR) },
+  { authorId: 'a_cipher', type: 'text', text: 'Great. I’ll send details tomorrow.', at: ago(22 * HR) },
+])
+
+const AT_NIGHT = build('ac_night', [
+  { authorId: ME, type: 'system', text: 'You created the anonymous group “Night Owls”', at: ago(4 * DAY) },
+  { authorId: 'a_raven', type: 'text', text: 'Joined via public key. No names here — I like it.', at: ago(4 * DAY - 3 * MIN) },
+  { authorId: 'a_moth', type: 'text', text: 'Same. Purely topic-based.', at: ago(3 * DAY) },
+  { authorId: 'a_raven', type: 'text', text: 'Agenda for tonight?', at: ago(40 * MIN), reactions: [{ emoji: '👍', by: [ME] }] },
+])
+
+MESSAGES.push(...AT_HERON, ...AT_CIPHER, ...AT_NIGHT)
+
+export const ANON_CONVERSATIONS: Conversation[] = [
+  { id: 'ac_heron', kind: 'private', env: 'anonymous', userId: 'a_heron', messageIds: ids(AT_HERON), unread: 1, encrypted: true },
+  { id: 'ac_cipher', kind: 'private', env: 'anonymous', userId: 'a_cipher', messageIds: ids(AT_CIPHER), unread: 0, encrypted: true },
+  { id: 'ac_night', kind: 'group', env: 'anonymous', title: 'Night Owls', groupType: 'standard', encrypted: true, participants: [
+      { userId: ME, role: 'owner' }, { userId: 'a_raven', role: 'member' }, { userId: 'a_moth', role: 'member' },
+    ], messageIds: ids(AT_NIGHT), unread: 2 },
+]
+CONVERSATIONS.push(...ANON_CONVERSATIONS)
+
 export const NOTIFICATIONS: AppNotification[] = [
   { id: 'n1', kind: 'message', fromId: 'u_sita', title: 'Sita Rai', body: 'Agreed. I’ll update the tokens 👇', at: ago(4 * MIN), read: false, conversationId: 'c_sita' },
   { id: 'n2', kind: 'mention', fromId: 'u_rojan', title: 'Design Team', body: 'Rojan mentioned you: “can you own the icon audit?”', at: ago(30 * MIN), read: false, conversationId: 'c_design' },

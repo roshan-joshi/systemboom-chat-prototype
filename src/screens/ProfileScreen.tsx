@@ -11,6 +11,7 @@ import {
   Moon,
   Monitor,
   BadgeCheck,
+  VenetianMask,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useState } from 'react'
@@ -147,6 +148,23 @@ export function ProfileScreen() {
                 <Icon as={ChevronRight} size="sm" />
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Anonymous communication (FLOW-011) */}
+        <div className="sb-block">
+          <p className="sb-section-label">Privacy mode</p>
+          <div className="sb-settings-group">
+            <button className="sb-settings-row sb-settings-row--btn" onClick={() => navigate('/anon')}>
+              <span className="sb-settings-row__icon" style={{ background: 'var(--sb-anon-soft)', color: 'var(--sb-anon)' }}>
+                <Icon as={VenetianMask} size="sm" />
+              </span>
+              <span className="sb-settings-row__body">
+                <span className="sb-settings-row__title" style={{ display: 'block' }}>Switch to Anonymous</span>
+                <span className="sb-settings-row__sub">A separate, identity-free space — kept fully independent</span>
+              </span>
+              <Icon as={ChevronRight} size="sm" />
+            </button>
           </div>
         </div>
 

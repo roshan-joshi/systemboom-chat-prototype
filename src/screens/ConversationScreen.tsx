@@ -21,7 +21,8 @@ import {
   ShoppingBag,
   Megaphone,
 } from 'lucide-react'
-import { useRouter, useParams } from '@/lib/router'
+import { useRouter } from '@/lib/router'
+import { VenetianMask, KeyRound, LogOut, Ban, Flag } from 'lucide-react'
 import {
   TopAppBar,
   IconButton,
@@ -47,10 +48,13 @@ import type { Message } from '@/data/types'
 const QUICK_EMOJI = ['❤️', '😂', '👍', '😮', '😢', '🙏']
 
 export function ConversationScreen() {
-  const { navigate, back } = useRouter()
-  const { id } = useParams('/chats/:id')
+  const { navigate, back, path } = useRouter()
+  // Works for both /chats/:id and /anon/chats/:id — id is the last segment.
+  const id = path.split('/').filter(Boolean).pop()
   const store = useStore()
   const conv = useConversation(id)
+  const isAnon = conv?.env === 'anonymous'
+  const chatsBase = isAnon ? '/anon/chats' : '/chats'
   const messages = useMessages(id)
   const other = useUser(conv?.kind === 'private' ? conv.userId : undefined)
   const toast = useToast()
@@ -138,8 +142,11 @@ export function ConversationScreen() {
   }
 
   const title = conv.kind === 'group' ? conv.title ?? 'Group' : other?.name ?? 'Chat'
-  const statusLine =
-    conv.kind === 'group'
+  const statusLine = isAnon
+    ? conv.kind === 'group'
+      ? `${conv.participants?.length ?? 0} members · anonymous`
+      : 'anonymous · identity hidden'
+    : conv.kind === 'group'
       ? `${conv.participants?.length ?? 0} members`
       : other?.presence === 'online'
         ? 'online'
@@ -167,24 +174,34 @@ export function ConversationScreen() {
     { label: 'Location', icon: MapPin, color: 'linear-gradient(135deg,#1fa971,#178a5c)', onSelect: () => { store.sendMessage(id!, { type: 'location', location: { label: 'My location', area: 'Kathmandu, Nepal' } }); setAttachOpen(false) } },
     { label: 'Contact', icon: ContactIcon, color: 'linear-gradient(135deg,#d9930b,#b87a09)', onSelect: () => { store.sendMessage(id!, { type: 'contact', contact: { name: 'Rojan KC', phone: '+977 9806 789 012' } }); setAttachOpen(false) } },
     { label: 'Product', icon: ShoppingBag, color: 'linear-gradient(135deg,#6b52c9,#4a3a8f)', onSelect: () => { store.sendMessage(id!, { type: 'product', product: { title: 'SystemBoom Tote', price: 'Rs 1,200', image: 'prod-1', seller: 'Boom Store', availability: 'In stock' } }); setAttachOpen(false) } },
-  ]
+  // Commerce (Product) is not available in anonymous mode (PS-004 scope).
+  ].filter((o) => !isAnon || o.label !== 'Product')
 
   const isMineMsg = actionFor?.authorId === store.me
 
+  const openHeader = () => {
+    if (isAnon) {
+      if (conv.kind === 'private' && conv.userId) navigate(`/anon/key/${conv.userId}`)
+    } else {
+      navigate(`/chats/${id}/info`)
+    }
+  }
+
   return (
-    <div className="sb-fill">
+    <div className="sb-fill" data-anon={isAnon ? 'true' : undefined}>
       <TopAppBar
         titleContent={
-          <button className="sb-chathead" onClick={() => navigate(`/chats/${id}/info`)}>
+          <button className="sb-chathead" onClick={openHeader}>
             <Avatar
               name={title}
-              kind={conv.kind === 'group' ? (conv.groupType === 'business' ? 'business' : 'group') : 'user'}
+              kind={isAnon ? (conv.kind === 'group' ? 'group' : 'anonymous') : conv.kind === 'group' ? (conv.groupType === 'business' ? 'business' : 'group') : 'user'}
               size="md"
-              presence={conv.kind === 'private' ? other?.presence : undefined}
+              presence={!isAnon && conv.kind === 'private' ? other?.presence : undefined}
             />
             <span className="sb-chathead__body">
               <span className="sb-chathead__name">{title}</span>
               <span className={statusLine === 'online' ? 'sb-chathead__status sb-chathead__status--online' : 'sb-chathead__status'}>
+                {isAnon && <Icon as={VenetianMask} size={12} />}
                 {conv.announcementMode && <Icon as={Megaphone} size={12} />}
                 {store.state.typing[id!] ? 'typing…' : statusLine}
               </span>
@@ -194,8 +211,12 @@ export function ConversationScreen() {
         onBack={back}
         actions={
           <>
-            <IconButton icon={Video} label="Video call" onClick={() => navigate(`/call/${id}?kind=video`)} />
-            <IconButton icon={Phone} label="Voice call" onClick={() => navigate(`/call/${id}?kind=voice`)} />
+            {!isAnon && (
+              <>
+                <IconButton icon={Video} label="Video call" onClick={() => navigate(`/call/${id}?kind=video`)} />
+                <IconButton icon={Phone} label="Voice call" onClick={() => navigate(`/call/${id}?kind=voice`)} />
+              </>
+            )}
             <IconButton icon={MoreVertical} label="More" onClick={() => setHeaderMenu(true)} />
           </>
         }
@@ -203,8 +224,10 @@ export function ConversationScreen() {
 
       {conv.encrypted && messages.length > 0 && (
         <div style={{ padding: '8px var(--sb-space-3) 0' }}>
-          <Banner tone="info" icon={ShieldCheck}>
-            Messages are end-to-end encrypted. No one outside this chat can read them.
+          <Banner tone={isAnon ? 'anon' : 'info'} icon={isAnon ? VenetianMask : ShieldCheck}>
+            {isAnon
+              ? 'You are chatting anonymously. Identities are hidden and messages are end-to-end encrypted.'
+              : 'Messages are end-to-end encrypted. No one outside this chat can read them.'}
           </Banner>
         </div>
       )}
@@ -313,11 +336,22 @@ export function ConversationScreen() {
         open={headerMenu}
         onClose={() => setHeaderMenu(false)}
         title={title}
-        actions={[
-          { label: 'View info', icon: Info, onSelect: () => navigate(`/chats/${id}/info`) },
-          { label: 'Search in chat', icon: Search, onSelect: () => navigate(`/chats/${id}/search`) },
-          { label: conv.muted ? 'Unmute' : 'Mute', icon: MoreVertical, onSelect: () => { store.toggleMute(id!); toast.show(conv.muted ? 'Unmuted' : 'Muted') } },
-        ]}
+        actions={
+          isAnon
+            ? [
+                ...(conv.kind === 'private' && conv.userId
+                  ? [{ label: 'View public key', icon: KeyRound, onSelect: () => navigate(`/anon/key/${conv.userId}`) }]
+                  : []),
+                { label: 'Report', icon: Flag, onSelect: () => toast.show('Report submitted') },
+                { label: 'Block', icon: Ban, danger: true, onSelect: () => { toast.show('Identity blocked'); navigate('/anon/chats') } },
+                { label: 'Exit conversation', icon: LogOut, danger: true, onSelect: () => navigate('/anon/chats') },
+              ]
+            : [
+                { label: 'View info', icon: Info, onSelect: () => navigate(`/chats/${id}/info`) },
+                { label: 'Search in chat', icon: Search, onSelect: () => navigate(`/chats/${id}/search`) },
+                { label: conv.muted ? 'Unmute' : 'Mute', icon: MoreVertical, onSelect: () => { store.toggleMute(id!); toast.show(conv.muted ? 'Unmuted' : 'Muted') } },
+              ]
+        }
       />
     </div>
   )

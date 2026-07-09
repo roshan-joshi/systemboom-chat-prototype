@@ -69,6 +69,7 @@ export function ConversationListItem({
   avatarName,
   avatarSrc,
   kind,
+  anonAvatar,
   presence,
   preview,
   time,
@@ -85,6 +86,7 @@ export function ConversationListItem({
   avatarName: string
   avatarSrc?: string
   kind: 'private' | 'group' | 'business'
+  anonAvatar?: boolean
   presence?: 'online' | 'away' | 'offline'
   preview: ReactNode
   time: number
@@ -126,7 +128,7 @@ export function ConversationListItem({
       <Avatar
         name={avatarName}
         src={avatarSrc}
-        kind={kind === 'private' ? 'user' : kind}
+        kind={anonAvatar ? 'anonymous' : kind === 'private' ? 'user' : kind}
         size="lg"
         presence={presence}
       />

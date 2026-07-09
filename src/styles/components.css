@@ -463,9 +463,9 @@ textarea.sb-input__control {
 .sb-avatar--business .sb-avatar__fallback,
 .sb-avatar--business .sb-avatar__img { border-radius: var(--sb-radius-md); }
 .sb-avatar--anon {
-  background: var(--sb-anon-soft) !important;
-  color: var(--sb-on-anon-soft);
-  border: 1px dashed var(--sb-anon);
+  background: linear-gradient(140deg, #7c62d6, #4a3596) !important;
+  color: #fff;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.28);
 }
 .sb-avatar__presence {
   position: absolute;

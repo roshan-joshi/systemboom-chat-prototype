@@ -325,6 +325,34 @@
   --sb-focus-ring: 0 0 0 3px rgba(229, 57, 43, 0.5);
 }
 
+/* =========================================================
+   ANONYMOUS ENVIRONMENT  (PS-004 — distinct visual identity)
+   A violet accent replaces the brand red so users always know they are
+   anonymous. Every component is reused unchanged; only the accent shifts.
+   ========================================================= */
+[data-anon='true'] {
+  --sb-primary: #6b52c9;
+  --sb-primary-hover: #5942b0;
+  --sb-primary-active: #4a3596;
+  --sb-primary-soft: #ece7f9;
+  --sb-primary-soft-hover: #e0d8f5;
+  --sb-on-primary-soft: #543da8;
+  --sb-brand: #6b52c9;
+  --sb-bubble-out: #6b52c9;
+  --sb-bubble-out-text: #ffffff;
+  --sb-focus-ring: 0 0 0 3px rgba(107, 82, 201, 0.4);
+}
+:root[data-theme='dark'] [data-anon='true'] {
+  --sb-primary: #7c5fe0;
+  --sb-primary-hover: #9179ec;
+  --sb-primary-active: #b6a2ff;
+  --sb-primary-soft: rgba(139, 111, 233, 0.22);
+  --sb-primary-soft-hover: rgba(139, 111, 233, 0.32);
+  --sb-on-primary-soft: #b6a2ff;
+  --sb-brand: #a48bff;
+  --sb-bubble-out: #6f56cc;
+}
+
 /* Respect users who prefer reduced motion (DS-001 Accessibility, DS-002 motion) */
 @media (prefers-reduced-motion: reduce) {
   *,

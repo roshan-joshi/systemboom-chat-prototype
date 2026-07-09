@@ -5,6 +5,8 @@ import {
   Phone,
   Store,
   CircleUser,
+  VenetianMask,
+  UserCog,
 } from 'lucide-react'
 import { matchPath } from '@/lib/router'
 import type { NavItem } from '@/components'
@@ -30,7 +32,16 @@ import {
   SettingsScreen,
   SettingsDetailScreen,
 } from '@/screens/SystemScreens'
-import { MarketplaceScreen, AnonymousScreen } from '@/screens/destinations'
+import { MarketplaceScreen } from '@/screens/destinations'
+import {
+  AnonymousHomeScreen,
+  AnonChatListScreen,
+  MyQRScreen,
+  QRScannerScreen,
+  PublicKeyScreen,
+  IdentityManagerScreen,
+  AnonCreateGroupScreen,
+} from '@/screens/AnonScreens'
 
 export type Chrome = 'full' | 'app'
 
@@ -82,9 +93,23 @@ export const ROUTES: RouteDef[] = [
   // Notifications inbox (global; settings live at /settings/notifications = SC-104)
   { id: 'PT-notifications', pattern: '/notifications', element: <NotificationsScreen />, chrome: 'app', deep: true },
 
-  { id: 'SC-040', pattern: '/anonymous', element: <AnonymousScreen />, chrome: 'app' },
+  // Anonymous Communication (PS-004 / PD-033) — a separate environment
+  { id: 'SC-040', pattern: '/anon', element: <AnonymousHomeScreen />, chrome: 'app', tab: 'anon-home' },
+  { id: 'SC-041', pattern: '/anon/chats', element: <AnonChatListScreen />, chrome: 'app', tab: 'anon-chats' },
+  { id: 'SC-042', pattern: '/anon/chats/:id', element: <ConversationScreen />, chrome: 'app', deep: true },
+  { id: 'SC-044', pattern: '/anon/scan', element: <QRScannerScreen />, chrome: 'app', deep: true },
+  { id: 'SC-045', pattern: '/anon/qr', element: <MyQRScreen />, chrome: 'app', deep: true },
+  { id: 'SC-046', pattern: '/anon/key/:id', element: <PublicKeyScreen />, chrome: 'app', deep: true },
+  { id: 'SC-047', pattern: '/anon/identities', element: <IdentityManagerScreen />, chrome: 'app', tab: 'anon-id' },
+  { id: 'PT-anon-newgroup', pattern: '/anon/new-group', element: <AnonCreateGroupScreen />, chrome: 'app', deep: true },
+
   { id: 'PT-design', pattern: '/design', element: <DesignSystemScreen />, chrome: 'app', deep: true },
 ]
+
+/** Is this path inside the Anonymous Communication environment? */
+export function isAnonPath(path: string): boolean {
+  return path === '/anon' || path.startsWith('/anon/')
+}
 
 export interface ResolvedRoute {
   route: RouteDef
@@ -109,4 +134,11 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'calls', label: 'Calls', icon: Phone, to: '/calls' },
   { id: 'marketplace', label: 'Market', icon: Store, to: '/marketplace' },
   { id: 'profile', label: 'Profile', icon: CircleUser, to: '/profile' },
+]
+
+/* Anonymous environment nav — messaging only (PS-004: no other modules). */
+export const ANON_NAV_ITEMS: NavItem[] = [
+  { id: 'anon-home', label: 'Anonymous', icon: VenetianMask, to: '/anon' },
+  { id: 'anon-chats', label: 'Chats', icon: MessageSquare, to: '/anon/chats' },
+  { id: 'anon-id', label: 'Identity', icon: UserCog, to: '/anon/identities' },
 ]

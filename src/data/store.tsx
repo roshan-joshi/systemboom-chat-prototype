@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import type {
+  AnonIdentity,
   AppNotification,
   CallRecord,
   Conversation,
@@ -16,7 +17,29 @@ import type {
   MessageStatus,
   User,
 } from './types'
-import { USERS, CONVERSATIONS, MESSAGES, CALLS, NOTIFICATIONS, ME } from './mock'
+import {
+  USERS,
+  CONVERSATIONS,
+  MESSAGES,
+  CALLS,
+  NOTIFICATIONS,
+  ME,
+  MY_ANON,
+  keyMaterial,
+  ANON_ADJECTIVES,
+  ANON_ANIMALS,
+} from './mock'
+
+/** Runtime randomness (fine in-app; only workflow scripts forbid it). */
+function rand(n: number) {
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    return crypto.getRandomValues(new Uint32Array(1))[0] % n
+  }
+  return Math.floor(Math.random() * n)
+}
+function randomAnonName(): string {
+  return `${ANON_ADJECTIVES[rand(ANON_ADJECTIVES.length)]} ${ANON_ANIMALS[rand(ANON_ANIMALS.length)]} ${1000 + rand(9000)}`
+}
 
 /* ---------------- State ---------------- */
 interface State {
@@ -26,6 +49,9 @@ interface State {
   calls: CallRecord[]
   notifications: AppNotification[]
   typing: Record<ID, boolean>
+  // Anonymous environment (PS-004 / PD-033)
+  anonIdentities: AnonIdentity[]
+  activeAnonId: ID
 }
 
 function initState(): State {
@@ -36,6 +62,8 @@ function initState(): State {
     calls: [...CALLS],
     notifications: [...NOTIFICATIONS],
     typing: {},
+    anonIdentities: [{ ...MY_ANON }],
+    activeAnonId: MY_ANON.id,
   }
 }
 
@@ -51,6 +79,10 @@ type Action =
   | { type: 'mark_read'; conversationId: ID }
   | { type: 'read_all_notifications' }
   | { type: 'read_notification'; id: ID }
+  | { type: 'add_user'; user: User }
+  | { type: 'add_anon_identity'; identity: AnonIdentity }
+  | { type: 'set_active_anon'; id: ID }
+  | { type: 'delete_anon_identity'; id: ID }
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -142,6 +174,25 @@ function reducer(state: State, action: Action): State {
           n.id === action.id ? { ...n, read: true } : n,
         ),
       }
+    case 'add_user':
+      return { ...state, users: { ...state.users, [action.user.id]: action.user } }
+    case 'add_anon_identity':
+      return {
+        ...state,
+        anonIdentities: [...state.anonIdentities, action.identity],
+        activeAnonId: action.identity.id,
+      }
+    case 'set_active_anon':
+      return { ...state, activeAnonId: action.id }
+    case 'delete_anon_identity': {
+      const remaining = state.anonIdentities.filter((a) => a.id !== action.id)
+      if (remaining.length === 0) return state // never delete the last identity
+      return {
+        ...state,
+        anonIdentities: remaining,
+        activeAnonId: state.activeAnonId === action.id ? remaining[0].id : state.activeAnonId,
+      }
+    }
     default:
       return state
   }
@@ -172,10 +223,20 @@ interface StoreApi {
   toggleMute: (id: ID) => void
   toggleArchive: (id: ID) => void
   markRead: (conversationId: ID) => void
-  createGroup: (name: string, memberIds: ID[], groupType?: Conversation['groupType']) => ID
+  createGroup: (
+    name: string,
+    memberIds: ID[],
+    opts?: { groupType?: Conversation['groupType']; env?: 'registered' | 'anonymous' },
+  ) => ID
   openOrCreatePrivate: (userId: ID) => ID
   readAllNotifications: () => void
   readNotification: (id: ID) => void
+  // Anonymous environment
+  createAnonIdentity: (name?: string) => ID
+  setActiveAnon: (id: ID) => void
+  deleteAnonIdentity: (id: ID) => void
+  /** Simulate scanning/exchanging a QR public key → new anon contact + chat. */
+  pairViaQR: (name?: string) => ID
 }
 
 const StoreContext = createContext<StoreApi | null>(null)
@@ -251,13 +312,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'patch_conversation', id, patch: { archived: !c?.archived } })
       },
       markRead: (conversationId) => dispatch({ type: 'mark_read', conversationId }),
-      createGroup: (name, memberIds, groupType = 'standard') => {
-        const id = `c_${Date.now()}`
+      createGroup: (name, memberIds, opts) => {
+        const env = opts?.env ?? 'registered'
+        const id = `${env === 'anonymous' ? 'ac' : 'c'}_${Date.now()}`
         const conversation: Conversation = {
           id,
           kind: 'group',
+          env,
           title: name,
-          groupType,
+          groupType: opts?.groupType ?? 'standard',
           encrypted: true,
           unread: 0,
           participants: [
@@ -296,6 +359,53 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
       readAllNotifications: () => dispatch({ type: 'read_all_notifications' }),
       readNotification: (id) => dispatch({ type: 'read_notification', id }),
+
+      createAnonIdentity: (name) => {
+        const id = `anon-${Date.now()}`
+        const nm = name?.trim() || randomAnonName()
+        const identity: AnonIdentity = {
+          id,
+          name: nm,
+          createdAt: Date.now(),
+          ...keyMaterial(nm + id),
+        }
+        dispatch({ type: 'add_anon_identity', identity })
+        return id
+      },
+      setActiveAnon: (id) => dispatch({ type: 'set_active_anon', id }),
+      deleteAnonIdentity: (id) => dispatch({ type: 'delete_anon_identity', id }),
+
+      pairViaQR: (name) => {
+        const nm = name?.trim() || randomAnonName()
+        const userId = `a_${Date.now()}`
+        const km = keyMaterial(nm + userId)
+        const user: User = { id: userId, name: nm, presence: 'online', anon: true, ...km }
+        dispatch({ type: 'add_user', user })
+        const convId = `ac_${Date.now()}`
+        const conversation: Conversation = {
+          id: convId,
+          kind: 'private',
+          env: 'anonymous',
+          userId,
+          messageIds: [],
+          unread: 0,
+          encrypted: true,
+        }
+        dispatch({ type: 'add_conversation', conversation })
+        dispatch({
+          type: 'add_message',
+          message: {
+            id: `m${++idRef.current}`,
+            conversationId: convId,
+            authorId: ME,
+            type: 'system',
+            text: 'Identities exchanged via QR. This conversation is end-to-end encrypted.',
+            status: 'read',
+            createdAt: Date.now(),
+          },
+        })
+        return convId
+      },
     }),
     [state, sendMessage],
   )
@@ -315,21 +425,36 @@ export function useUser(id?: ID): User | undefined {
   return id ? state.users[id] : undefined
 }
 
-/** Conversations sorted by last activity, excluding archived by default. */
-export function useConversationList(opts?: { archived?: boolean }) {
+/** Conversations sorted by last activity, scoped to an environment (PD-033). */
+export function useConversationList(opts?: {
+  archived?: boolean
+  env?: 'registered' | 'anonymous'
+}) {
   const { state } = useStore()
+  const env = opts?.env ?? 'registered'
   return useMemo(() => {
     const lastAt = (c: Conversation) => {
       const last = c.messageIds[c.messageIds.length - 1]
       return last ? state.messages[last]?.createdAt ?? 0 : 0
     }
     return state.conversations
+      .filter((c) => (c.env ?? 'registered') === env)
       .filter((c) => (opts?.archived ? c.archived : !c.archived))
       .sort((a, b) => {
         if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1
         return lastAt(b) - lastAt(a)
       })
-  }, [state.conversations, state.messages, opts?.archived])
+  }, [state.conversations, state.messages, opts?.archived, env])
+}
+
+/** Anonymous identities + the currently active one (PS-006). */
+export function useAnonIdentities(): AnonIdentity[] {
+  const { state } = useStore()
+  return state.anonIdentities
+}
+export function useActiveAnon(): AnonIdentity {
+  const { state } = useStore()
+  return state.anonIdentities.find((a) => a.id === state.activeAnonId) ?? state.anonIdentities[0]
 }
 
 export function useConversation(id?: ID): Conversation | undefined {

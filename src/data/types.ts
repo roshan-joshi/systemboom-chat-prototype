@@ -18,6 +18,25 @@ export interface User {
   lastSeen?: string
   verified?: boolean
   business?: boolean
+  // Anonymous (device-identity) fields — PS-004 / PS-006
+  anon?: boolean
+  sessionId?: string
+  publicKey?: string
+  fingerprint?: string
+}
+
+/**
+ * An anonymous, device-generated cryptographic identity (PD-033).
+ * The public key is shareable (QR); the private key never leaves the device.
+ * Visible fields per PS-006: temporary display name, avatar, session id.
+ */
+export interface AnonIdentity {
+  id: ID
+  name: string // temporary display name
+  sessionId: string
+  publicKey: string
+  fingerprint: string
+  createdAt: number
 }
 
 /** PS-001 supported content types (Stickers are Future). */
@@ -84,6 +103,8 @@ export type GroupType = 'standard' | 'family' | 'business'
 export interface Conversation {
   id: ID
   kind: 'private' | 'group'
+  /** Which communication environment this conversation belongs to (PD-033). */
+  env?: 'registered' | 'anonymous'
   messageIds: ID[]
   unread: number
   pinned?: boolean
