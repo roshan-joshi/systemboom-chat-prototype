@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   KeyRound,
   Eye,
+  Package,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useRouter, useParams } from '@/lib/router'
@@ -49,6 +50,7 @@ const NOTIF_ICON: Record<NotificationKind, LucideIcon> = {
   reaction: Heart,
   missed_call: PhoneMissed,
   group_invite: Users,
+  order: Package,
 }
 
 /* Notifications */

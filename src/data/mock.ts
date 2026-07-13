@@ -3,6 +3,8 @@ import type {
   CallRecord,
   Conversation,
   Message,
+  Order,
+  Product,
   User,
 } from './types'
 
@@ -248,10 +250,65 @@ export const ANON_CONVERSATIONS: Conversation[] = [
 ]
 CONVERSATIONS.push(...ANON_CONVERSATIONS)
 
+/* ==========================================================================
+   CONVERSATION COMMERCE (PS-003) — commerce lives inside conversations
+   ========================================================================== */
+
+// Additional verified business sellers (u_boom already exists).
+Object.assign(USERS, {
+  u_himal: { id: 'u_himal', name: 'Himal Threads', about: 'Handmade in the Himalayas', presence: 'online', verified: true, business: true } as User,
+  u_craft: { id: 'u_craft', name: 'Everest Craft Co.', about: 'Woodwork & ceramics', presence: 'away', lastSeen: '1 hr ago', verified: true, business: true } as User,
+})
+
+export const PRODUCTS: Product[] = [
+  { id: 'p_deskmat', title: 'SystemBoom Desk Mat — Large', price: 2400, image: 'p1', category: 'Home', sellerId: 'u_boom', availability: 'In stock', rating: 4.8, reviews: 126, description: 'Natural cork base with stitched edges. A calm, premium surface for your desk. 900 × 400 mm.' },
+  { id: 'p_buds', title: 'SystemBoom Wireless Buds', price: 6900, image: 'p2', category: 'Tech', sellerId: 'u_boom', availability: 'In stock', rating: 4.6, reviews: 210, description: 'Active noise cancellation, 32-hour battery, and a featherlight fit. Tuned for calls and calm listening.' },
+  { id: 'p_tote', title: 'SystemBoom Canvas Tote', price: 1200, image: 'p3', category: 'Apparel', sellerId: 'u_boom', availability: 'In stock', rating: 4.6, reviews: 84, description: 'Heavyweight organic cotton with an internal pocket. Everyday carry, quietly branded.' },
+  { id: 'p_bottle', title: 'Insulated Steel Bottle', price: 1800, image: 'p4', category: 'Home', sellerId: 'u_boom', availability: 'Low stock', rating: 4.7, reviews: 52, description: 'Keeps drinks cold 24h / hot 12h. Powder-coated, leak-proof, 750 ml.' },
+  { id: 'p_scarf', title: 'Handwoven Pashmina Scarf', price: 3200, image: 'p5', category: 'Craft', sellerId: 'u_himal', availability: 'In stock', rating: 5.0, reviews: 61, description: 'Ethically sourced cashmere, handwoven by artisans in Kathmandu. Soft, warm, timeless.' },
+  { id: 'p_hoodie', title: 'Everest Wool Hoodie', price: 4500, image: 'p6', category: 'Apparel', sellerId: 'u_himal', availability: 'Made to order', rating: 4.9, reviews: 38, description: 'Merino-blend, brushed interior, made to your size in 7–10 days.' },
+  { id: 'p_lamp', title: 'Walnut Desk Lamp', price: 5200, image: 'p7', category: 'Home', sellerId: 'u_craft', availability: 'In stock', rating: 4.5, reviews: 22, description: 'Solid walnut with a warm dimmable LED. Hand-finished, one at a time.' },
+  { id: 'p_journal', title: 'Handbound Journal', price: 900, image: 'p8', category: 'Craft', sellerId: 'u_himal', availability: 'In stock', rating: 4.8, reviews: 73, description: 'Lokta paper, hand-stitched binding. 180 pages, lays flat.' },
+  { id: 'p_planter', title: 'Ceramic Planter Set', price: 1600, image: 'p1', category: 'Home', sellerId: 'u_craft', availability: 'In stock', rating: 4.4, reviews: 40, description: 'Set of three hand-thrown planters with drainage trays. Matte glaze.' },
+]
+
+// A demo order mid-lifecycle (shipped) to populate tracking + order views.
+export const ORDERS: Order[] = [
+  {
+    id: 'ord_demo',
+    conversationId: 'c_boom',
+    sellerId: 'u_boom',
+    items: [{ productId: 'p_deskmat', title: 'SystemBoom Desk Mat — Large', image: 'p1', unitPrice: 2250, qty: 2 }],
+    finalPrice: 4500,
+    deliveryFee: 0,
+    address: 'Baneshwor, Kathmandu 44600',
+    status: 'shipped',
+    paymentStatus: 'paid',
+    paymentMethod: 'eSewa wallet',
+    createdAt: ago(2 * DAY),
+    tracking: { code: 'SB7731NP', courier: 'Boom Express' },
+  },
+]
+
+// Post the order lifecycle into the Boom Store conversation (PD-037).
+const ORDER_MSGS = build('c_boom', [
+  { authorId: ME, type: 'system', text: 'Order #SB7731NP created · Rs 4,500', at: ago(2 * DAY) },
+  { authorId: ME, type: 'order', orderRef: { orderId: 'ord_demo' }, at: ago(2 * DAY - 30_000) },
+  { authorId: 'u_boom', type: 'system', text: 'Payment confirmed ✓', at: ago(2 * DAY - 60_000) },
+  { authorId: 'u_boom', type: 'text', text: 'Thank you! Packing now — I’ll share tracking shortly. 📦', at: ago(2 * DAY - 90_000) },
+  { authorId: 'u_boom', type: 'system', text: 'Item shipped · Boom Express (SB7731NP)', at: ago(1 * DAY) },
+])
+MESSAGES.push(...ORDER_MSGS)
+{
+  const boom = CONVERSATIONS.find((c) => c.id === 'c_boom')
+  if (boom) boom.messageIds.push(...ORDER_MSGS.map((m) => m.id))
+}
+
 export const NOTIFICATIONS: AppNotification[] = [
   { id: 'n1', kind: 'message', fromId: 'u_sita', title: 'Sita Rai', body: 'Agreed. I’ll update the tokens 👇', at: ago(4 * MIN), read: false, conversationId: 'c_sita' },
   { id: 'n2', kind: 'mention', fromId: 'u_rojan', title: 'Design Team', body: 'Rojan mentioned you: “can you own the icon audit?”', at: ago(30 * MIN), read: false, conversationId: 'c_design' },
   { id: 'n3', kind: 'reaction', fromId: 'u_mom', title: 'Aama', body: 'reacted 😍 to your message', at: ago(3 * HR), read: false, conversationId: 'c_family' },
   { id: 'n4', kind: 'missed_call', fromId: 'u_prakash', title: 'Prakash Sharma', body: 'Missed voice call', at: ago(1 * DAY - 2 * HR), read: true, conversationId: 'c_prakash' },
   { id: 'n5', kind: 'group_invite', fromId: 'u_boom', title: 'Boom Sellers', body: 'You were added to the group', at: ago(7 * DAY), read: true, conversationId: 'c_announce' },
+  { id: 'n6', kind: 'order', fromId: 'u_boom', title: 'Boom Store', body: 'Item shipped · Boom Express (SB7731NP)', at: ago(1 * DAY), read: false, conversationId: 'c_boom' },
 ]

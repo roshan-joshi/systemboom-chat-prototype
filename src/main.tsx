@@ -6,6 +6,7 @@ import './styles/tokens.css'
 import './styles/global.css'
 import './styles/components.css'
 import './styles/chat.css'
+import './styles/commerce.css'
 import './styles/screens.css'
 
 createRoot(document.getElementById('root')!).render(

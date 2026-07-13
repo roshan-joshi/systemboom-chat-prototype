@@ -131,6 +131,22 @@
 .sb-msgrow--grouped .sb-bubble--in { border-bottom-left-radius: var(--sb-radius-lg); }
 .sb-msgrow--grouped .sb-bubble--out { border-bottom-right-radius: var(--sb-radius-lg); }
 
+/* Bare bubble — commerce cards bring their own surface (PS-003) */
+.sb-bubble--bare {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  box-shadow: none;
+}
+.sb-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  color: var(--sb-text-tertiary);
+  margin: 3px 2px 0;
+}
+
 .sb-bubble__sender {
   font-size: var(--sb-text-label);
   font-weight: var(--sb-weight-bold);

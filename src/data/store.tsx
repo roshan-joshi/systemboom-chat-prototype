@@ -15,6 +15,11 @@ import type {
   ID,
   Message,
   MessageStatus,
+  Order,
+  OrderItem,
+  OrderStatus,
+  Product,
+  Review,
   User,
 } from './types'
 import {
@@ -28,6 +33,8 @@ import {
   keyMaterial,
   ANON_ADJECTIVES,
   ANON_ANIMALS,
+  PRODUCTS,
+  ORDERS,
 } from './mock'
 
 /** Runtime randomness (fine in-app; only workflow scripts forbid it). */
@@ -52,6 +59,10 @@ interface State {
   // Anonymous environment (PS-004 / PD-033)
   anonIdentities: AnonIdentity[]
   activeAnonId: ID
+  // Conversation Commerce (PS-003)
+  products: Product[]
+  orders: Record<ID, Order>
+  reviews: Review[]
 }
 
 function initState(): State {
@@ -64,6 +75,9 @@ function initState(): State {
     typing: {},
     anonIdentities: [{ ...MY_ANON }],
     activeAnonId: MY_ANON.id,
+    products: [...PRODUCTS],
+    orders: Object.fromEntries(ORDERS.map((o) => [o.id, o])),
+    reviews: [],
   }
 }
 
@@ -83,6 +97,9 @@ type Action =
   | { type: 'add_anon_identity'; identity: AnonIdentity }
   | { type: 'set_active_anon'; id: ID }
   | { type: 'delete_anon_identity'; id: ID }
+  | { type: 'add_order'; order: Order }
+  | { type: 'patch_order'; id: ID; patch: Partial<Order> }
+  | { type: 'add_review'; review: Review }
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -193,6 +210,15 @@ function reducer(state: State, action: Action): State {
         activeAnonId: state.activeAnonId === action.id ? remaining[0].id : state.activeAnonId,
       }
     }
+    case 'add_order':
+      return { ...state, orders: { ...state.orders, [action.order.id]: action.order } }
+    case 'patch_order':
+      return {
+        ...state,
+        orders: { ...state.orders, [action.id]: { ...state.orders[action.id], ...action.patch } },
+      }
+    case 'add_review':
+      return { ...state, reviews: [...state.reviews, action.review] }
     default:
       return state
   }
@@ -237,6 +263,12 @@ interface StoreApi {
   deleteAnonIdentity: (id: ID) => void
   /** Simulate scanning/exchanging a QR public key → new anon contact + chat. */
   pairViaQR: (name?: string) => ID
+  // Conversation Commerce (PS-003)
+  shareProduct: (conversationId: ID, productId: ID) => void
+  sendOffer: (conversationId: ID, offer: { productId: ID; price: number; qty: number; note?: string }) => void
+  createOrder: (args: { conversationId: ID; sellerId: ID; items: OrderItem[]; deliveryFee: number; address: string }) => ID
+  payOrder: (orderId: ID, method: string) => void
+  reviewOrder: (orderId: ID, r: { sellerRating: number; productRating: number; text: string }) => void
 }
 
 const StoreContext = createContext<StoreApi | null>(null)
@@ -406,6 +438,91 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         })
         return convId
       },
+
+      /* ---------------- Conversation Commerce (PS-003) ---------------- */
+      shareProduct: (conversationId, productId) => {
+        const p = state.products.find((x) => x.id === productId)
+        if (!p) return
+        dispatch({
+          type: 'add_message',
+          message: {
+            id: `m${++idRef.current}`,
+            conversationId,
+            authorId: ME,
+            type: 'product',
+            status: 'sent',
+            createdAt: Date.now(),
+            product: {
+              productId: p.id,
+              title: p.title,
+              price: `Rs ${p.price.toLocaleString()}`,
+              image: p.image,
+              seller: state.users[p.sellerId]?.name ?? 'Seller',
+              availability: p.availability,
+            },
+          },
+        })
+      },
+
+      sendOffer: (conversationId, offer) => {
+        const p = state.products.find((x) => x.id === offer.productId)
+        const mid = `m${++idRef.current}`
+        const base = { productId: offer.productId, title: p?.title ?? 'Product', price: offer.price, qty: offer.qty, by: 'buyer' as const, note: offer.note }
+        dispatch({
+          type: 'add_message',
+          message: { id: mid, conversationId, authorId: ME, type: 'offer', status: 'sent', createdAt: Date.now(), offer: { ...base, status: 'pending' } },
+        })
+        const conv = state.conversations.find((c) => c.id === conversationId)
+        const sellerId = conv?.userId ?? p?.sellerId
+        // Mock seller accepts the offer.
+        window.setTimeout(() => {
+          dispatch({ type: 'update_message', id: mid, patch: { offer: { ...base, status: 'accepted' } } })
+          if (sellerId)
+            dispatch({
+              type: 'add_message',
+              message: { id: `m${++idRef.current}`, conversationId, authorId: sellerId, type: 'text', text: `Deal 🤝 Rs ${offer.price.toLocaleString()} × ${offer.qty} works for me. Tap “Create order” when you’re ready.`, status: 'delivered', createdAt: Date.now() },
+            })
+        }, 1900)
+      },
+
+      createOrder: ({ conversationId, sellerId, items, deliveryFee, address }) => {
+        const id = `ord_${Date.now()}`
+        const finalPrice = items.reduce((s, i) => s + i.unitPrice * i.qty, 0) + deliveryFee
+        const order: Order = { id, conversationId, sellerId, items, finalPrice, deliveryFee, address, status: 'pending_payment', paymentStatus: 'unpaid', createdAt: Date.now() }
+        dispatch({ type: 'add_order', order })
+        dispatch({ type: 'add_message', message: { id: `m${++idRef.current}`, conversationId, authorId: ME, type: 'system', text: `Order created · Rs ${finalPrice.toLocaleString()}`, status: 'read', createdAt: Date.now() } })
+        dispatch({ type: 'add_message', message: { id: `m${++idRef.current}`, conversationId, authorId: ME, type: 'order', status: 'sent', createdAt: Date.now(), orderRef: { orderId: id } } })
+        return id
+      },
+
+      payOrder: (orderId, method) => {
+        const order = state.orders[orderId]
+        if (!order) return
+        const tracking = { code: 'SB' + String(1000 + Math.floor(Math.random() * 9000)) + 'NP', courier: 'Boom Express' }
+        dispatch({ type: 'patch_order', id: orderId, patch: { paymentStatus: 'paid', status: 'confirmed', paymentMethod: method, tracking } })
+        const cid = order.conversationId
+        // Only a status confirmation is posted — never payment details (PS-003).
+        dispatch({ type: 'add_message', message: { id: `m${++idRef.current}`, conversationId: cid, authorId: ME, type: 'system', text: 'Payment confirmed ✓', status: 'read', createdAt: Date.now() } })
+        const steps: [OrderStatus, string, number][] = [
+          ['shipped', `Item shipped · ${tracking.courier} (${tracking.code})`, 4500],
+          ['out_for_delivery', 'Out for delivery', 9000],
+          ['delivered', 'Delivered ✓', 13500],
+        ]
+        steps.forEach(([status, text, delay]) =>
+          window.setTimeout(() => {
+            dispatch({ type: 'patch_order', id: orderId, patch: { status } })
+            dispatch({ type: 'add_message', message: { id: `m${++idRef.current}`, conversationId: cid, authorId: order.sellerId, type: 'system', text, status: 'delivered', createdAt: Date.now() } })
+          }, delay),
+        )
+      },
+
+      reviewOrder: (orderId, r) => {
+        const order = state.orders[orderId]
+        if (!order) return
+        dispatch({ type: 'patch_order', id: orderId, patch: { reviewed: true, status: 'completed' } })
+        dispatch({ type: 'add_review', review: { id: `rev_${Date.now()}`, orderId, sellerId: order.sellerId, sellerRating: r.sellerRating, productRating: r.productRating, text: r.text, at: Date.now() } })
+        dispatch({ type: 'add_message', message: { id: `m${++idRef.current}`, conversationId: order.conversationId, authorId: ME, type: 'system', text: `You reviewed this order · ${r.sellerRating}★`, status: 'read', createdAt: Date.now() } })
+      },
     }),
     [state, sendMessage],
   )
@@ -455,6 +572,26 @@ export function useAnonIdentities(): AnonIdentity[] {
 export function useActiveAnon(): AnonIdentity {
   const { state } = useStore()
   return state.anonIdentities.find((a) => a.id === state.activeAnonId) ?? state.anonIdentities[0]
+}
+
+/* ---------------- Commerce selectors (PS-003) ---------------- */
+export function useProducts(): Product[] {
+  return useStore().state.products
+}
+export function useProduct(id?: ID): Product | undefined {
+  const { state } = useStore()
+  return id ? state.products.find((p) => p.id === id) : undefined
+}
+export function useOrder(id?: ID): Order | undefined {
+  const { state } = useStore()
+  return id ? state.orders[id] : undefined
+}
+export function useOrders(): Order[] {
+  const { state } = useStore()
+  return useMemo(
+    () => Object.values(state.orders).sort((a, b) => b.createdAt - a.createdAt),
+    [state.orders],
+  )
 }
 
 export function useConversation(id?: ID): Conversation | undefined {

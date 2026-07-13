@@ -42,6 +42,7 @@ import {
   useToast,
 } from '@/components'
 import { useStore, useConversation, useMessages, useUser } from '@/data/store'
+import { productGradient, money } from '@/components/commerce'
 import { dayLabel } from '@/data/format'
 import type { Message } from '@/data/types'
 
@@ -63,6 +64,7 @@ export function ConversationScreen() {
   const [replyTo, setReplyTo] = useState<Message | null>(null)
   const [editing, setEditing] = useState<Message | null>(null)
   const [attachOpen, setAttachOpen] = useState(false)
+  const [productPicker, setProductPicker] = useState(false)
   const [actionFor, setActionFor] = useState<Message | null>(null)
   const [headerMenu, setHeaderMenu] = useState(false)
   const [deleteFor, setDeleteFor] = useState<Message | null>(null)
@@ -173,7 +175,7 @@ export function ConversationScreen() {
     { label: 'Document', icon: FileText, color: 'linear-gradient(135deg,#2f7ee0,#2668bd)', onSelect: () => { store.sendMessage(id!, { type: 'document', document: { name: 'Shared-notes.pdf', size: '840 KB', ext: 'PDF' } }); setAttachOpen(false) } },
     { label: 'Location', icon: MapPin, color: 'linear-gradient(135deg,#1fa971,#178a5c)', onSelect: () => { store.sendMessage(id!, { type: 'location', location: { label: 'My location', area: 'Kathmandu, Nepal' } }); setAttachOpen(false) } },
     { label: 'Contact', icon: ContactIcon, color: 'linear-gradient(135deg,#d9930b,#b87a09)', onSelect: () => { store.sendMessage(id!, { type: 'contact', contact: { name: 'Rojan KC', phone: '+977 9806 789 012' } }); setAttachOpen(false) } },
-    { label: 'Product', icon: ShoppingBag, color: 'linear-gradient(135deg,#6b52c9,#4a3a8f)', onSelect: () => { store.sendMessage(id!, { type: 'product', product: { title: 'SystemBoom Tote', price: 'Rs 1,200', image: 'prod-1', seller: 'Boom Store', availability: 'In stock' } }); setAttachOpen(false) } },
+    { label: 'Product', icon: ShoppingBag, color: 'linear-gradient(135deg,#c88a00,#9a6a00)', onSelect: () => { setAttachOpen(false); setProductPicker(true) } },
   // Commerce (Product) is not available in anonymous mode (PS-004 scope).
   ].filter((o) => !isAnon || o.label !== 'Product')
 
@@ -264,6 +266,36 @@ export function ConversationScreen() {
       {/* Attachments */}
       <BottomSheet open={attachOpen} onClose={() => setAttachOpen(false)} title="Share">
         <AttachmentGrid options={attachOptions} />
+      </BottomSheet>
+
+      {/* Product picker — share a product into the conversation (PS-003) */}
+      <BottomSheet open={productPicker} onClose={() => setProductPicker(false)} title="Share a product">
+        <div className="sb-col" style={{ gap: 2 }}>
+          {store.state.products.map((p) => (
+            <button
+              key={p.id}
+              className="sb-convo"
+              onClick={() => {
+                store.shareProduct(id!, p.id)
+                setProductPicker(false)
+              }}
+            >
+              <span
+                className="sb-pimg"
+                style={{ width: 48, height: 48, borderRadius: 10, background: productGradient(p.image), flexShrink: 0 }}
+              >
+                <Icon as={ShoppingBag} size={18} />
+              </span>
+              <span className="sb-convo__body">
+                <span className="sb-convo__name">{p.title}</span>
+                <span className="sb-convo__preview">
+                  <span className="sb-price" style={{ fontSize: 'var(--sb-text-caption)' }}>{money(p.price)}</span>
+                  · {store.state.users[p.sellerId]?.name}
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
       </BottomSheet>
 
       {/* Message actions */}

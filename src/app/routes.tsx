@@ -32,7 +32,19 @@ import {
   SettingsScreen,
   SettingsDetailScreen,
 } from '@/screens/SystemScreens'
-import { MarketplaceScreen } from '@/screens/destinations'
+import {
+  MarketplaceScreen,
+  ProductDetailsScreen,
+  OrdersListScreen,
+} from '@/screens/MarketplaceScreens'
+import {
+  CreateOrderScreen,
+  MakeOfferScreen,
+  PaymentScreen,
+  OrderDetailsScreen,
+  TrackingScreen,
+  ReviewScreen,
+} from '@/screens/OrderScreens'
 import {
   AnonymousHomeScreen,
   AnonChatListScreen,
@@ -83,7 +95,17 @@ export const ROUTES: RouteDef[] = [
   { id: 'SC-063', pattern: '/calls', element: <CallHistoryScreen />, chrome: 'app', tab: 'calls' },
   { id: 'SC-061', pattern: '/call/:id', element: <CallScreen />, chrome: 'full' },
 
+  // Conversation Commerce (PS-003) — commerce extends conversations (PD-036)
   { id: 'SC-080', pattern: '/marketplace', element: <MarketplaceScreen />, chrome: 'app', tab: 'marketplace' },
+  { id: 'SC-081', pattern: '/marketplace/product/:id', element: <ProductDetailsScreen />, chrome: 'app', tab: 'marketplace', deep: true },
+  { id: 'SC-083', pattern: '/order/new/:productId', element: <CreateOrderScreen />, chrome: 'app', tab: 'marketplace', deep: true },
+  { id: 'SC-082', pattern: '/offer/new/:productId', element: <MakeOfferScreen />, chrome: 'app', tab: 'marketplace', deep: true },
+  { id: 'SC-085', pattern: '/pay/:id', element: <PaymentScreen />, chrome: 'app', tab: 'marketplace', deep: true },
+  { id: 'PT-orders', pattern: '/orders', element: <OrdersListScreen />, chrome: 'app', tab: 'marketplace', deep: true },
+  { id: 'SC-084', pattern: '/orders/:id', element: <OrderDetailsScreen />, chrome: 'app', tab: 'marketplace', deep: true },
+  { id: 'SC-086', pattern: '/orders/:id/track', element: <TrackingScreen />, chrome: 'app', tab: 'marketplace', deep: true },
+  { id: 'SC-087', pattern: '/orders/:id/review', element: <ReviewScreen />, chrome: 'app', tab: 'marketplace', deep: true },
+
   { id: 'SC-100', pattern: '/profile', element: <ProfileScreen />, chrome: 'app', tab: 'profile' },
 
   // Settings

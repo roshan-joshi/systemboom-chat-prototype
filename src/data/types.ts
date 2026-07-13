@@ -51,6 +51,8 @@ export type MessageType =
   | 'product'
   | 'link'
   | 'system'
+  | 'offer'
+  | 'order'
 
 /** PS-001 message states. */
 export type MessageStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed'
@@ -82,6 +84,7 @@ export interface Message {
   contact?: { name: string; phone: string }
   location?: { label: string; area: string }
   product?: {
+    productId?: ID
     title: string
     price: string
     image: string
@@ -89,6 +92,77 @@ export interface Message {
     availability: 'In stock' | 'Low stock' | 'Made to order'
   }
   link?: { url: string; title: string; desc: string; host: string }
+  // Conversation Commerce (PS-003)
+  offer?: {
+    productId: ID
+    title: string
+    price: number // proposed unit price
+    qty: number
+    by: 'buyer' | 'seller'
+    status: 'pending' | 'accepted' | 'declined'
+    note?: string
+  }
+  orderRef?: { orderId: ID } // renders a live order card
+}
+
+/* ============ Conversation Commerce (PS-003) ============ */
+export interface Product {
+  id: ID
+  title: string
+  price: number // in NPR (Rs)
+  image: string // gradient key / placeholder
+  category: string
+  sellerId: ID
+  availability: 'In stock' | 'Low stock' | 'Made to order'
+  rating: number
+  reviews: number
+  description: string
+  gallery?: string[]
+}
+
+export type OrderStatus =
+  | 'pending_payment'
+  | 'confirmed'
+  | 'shipped'
+  | 'out_for_delivery'
+  | 'delivered'
+  | 'completed'
+  | 'cancelled'
+
+export type PaymentStatus = 'unpaid' | 'paid' | 'refunded'
+
+export interface OrderItem {
+  productId: ID
+  title: string
+  image: string
+  unitPrice: number
+  qty: number
+}
+
+export interface Order {
+  id: ID
+  conversationId: ID // permanently linked (PD-037)
+  sellerId: ID
+  items: OrderItem[]
+  finalPrice: number
+  deliveryFee: number
+  address: string
+  status: OrderStatus
+  paymentStatus: PaymentStatus
+  paymentMethod?: string
+  createdAt: number
+  reviewed?: boolean
+  tracking?: { code: string; courier: string }
+}
+
+export interface Review {
+  id: ID
+  orderId: ID
+  sellerId: ID
+  sellerRating: number
+  productRating: number
+  text: string
+  at: number
 }
 
 export type Role = 'owner' | 'admin' | 'member'
@@ -137,6 +211,7 @@ export type NotificationKind =
   | 'mention'
   | 'group_invite'
   | 'reaction'
+  | 'order'
 
 export interface AppNotification {
   id: ID

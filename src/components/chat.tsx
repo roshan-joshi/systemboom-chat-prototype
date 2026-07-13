@@ -33,6 +33,7 @@ import { clockTime, dayLabel, listTime } from '@/data/format'
 import { Icon } from './Icon'
 import { Avatar } from './Avatar'
 import { IconButton } from './primitives'
+import { ProductChatCard, OfferCard, OrderCard } from './commerce'
 
 /* ---------- gradient placeholders (offline-safe stand-ins for media) ---------- */
 const GRAD: Record<string, string> = {
@@ -250,18 +251,11 @@ function BubbleContent({ m }: { m: Message }) {
         </div>
       )
     case 'product':
-      return (
-        <div className="sb-prodmsg">
-          <div className="sb-prodmsg__img" style={{ background: grad(m.product?.image) }}>
-            <Icon as={ShoppingBag} size={30} />
-          </div>
-          <div className="sb-prodmsg__title">{m.product?.title}</div>
-          <div className="sb-prodmsg__row">
-            <span className="sb-prodmsg__price">{m.product?.price}</span>
-            <span className="sb-badge sb-badge--success">{m.product?.availability}</span>
-          </div>
-        </div>
-      )
+      return <ProductChatCard message={m} />
+    case 'offer':
+      return <OfferCard message={m} />
+    case 'order':
+      return <OrderCard message={m} />
     case 'link':
       return (
         <div>
@@ -309,7 +303,8 @@ export function ChatBubble({
 }) {
   const m = message
   const longPress = useLongPress(() => onOpenActions(m))
-  const withMeta = m.type !== 'product' && m.type !== 'location'
+  const isCard = m.type === 'product' || m.type === 'offer' || m.type === 'order'
+  const withMeta = !isCard && m.type !== 'location'
 
   return (
     <div
@@ -326,6 +321,7 @@ export function ChatBubble({
             'sb-bubble',
             isMine ? 'sb-bubble--out' : 'sb-bubble--in',
             (m.type === 'image' || m.type === 'video') && !m.deleted && 'sb-bubble--media',
+            isCard && !m.deleted && 'sb-bubble--bare',
           )}
           {...longPress}
           onContextMenu={(e) => {
@@ -377,6 +373,12 @@ export function ChatBubble({
             </span>
           )}
         </div>
+        {isCard && !m.deleted && (
+          <span className="sb-card-meta" style={{ alignSelf: isMine ? 'flex-end' : 'flex-start' }}>
+            {clockTime(m.createdAt)}
+            {isMine && <StatusTicks status={m.status} />}
+          </span>
+        )}
         <Reactions message={m} me={me} />
       </div>
     </div>
@@ -538,6 +540,8 @@ export function previewOf(m: Message): string {
     case 'contact': return `👤 ${m.contact?.name ?? 'Contact'}`
     case 'location': return `📍 ${m.location?.label ?? 'Location'}`
     case 'product': return `🛍️ ${m.product?.title ?? 'Product'}`
+    case 'offer': return `🏷️ Offer · ${m.offer?.title ?? ''}`
+    case 'order': return `🧾 Order update`
     case 'link': return m.text || m.link?.title || 'Link'
     case 'system': return m.text ?? ''
     default: return m.text ?? ''
