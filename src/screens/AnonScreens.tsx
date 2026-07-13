@@ -50,6 +50,7 @@ import {
   useAnonIdentities,
   useUser,
   conversationTitle,
+  latestMessage,
 } from '@/data/store'
 import { previewOf } from '@/components'
 import type { AnonIdentity, Conversation } from '@/data/types'
@@ -249,7 +250,7 @@ function AnonHubScreen() {
 function AnonRow({ conv, onClick }: { conv: Conversation; onClick: () => void }) {
   const store = useStore()
   const users = store.state.users
-  const last = conv.messageIds.length ? store.state.messages[conv.messageIds[conv.messageIds.length - 1]] : undefined
+  const last = latestMessage(conv, store.state.messages)
   const user = conv.userId ? users[conv.userId] : undefined
   return (
     <ConversationListItem
@@ -415,15 +416,19 @@ export function PublicKeyScreen() {
   const { back } = useRouter()
   const { id } = useParams('/anon/key/:id')
   const me = useActiveAnon()
+  const identities = useAnonIdentities()
   const contact = useUser(id)
   const toast = useToast()
   const [verified, setVerified] = useState(false)
 
-  const isSelf = id === 'anon-me'
-  const name = isSelf ? me.name : contact?.name ?? 'Unknown'
-  const publicKey = isSelf ? me.publicKey : contact?.publicKey ?? ''
-  const fingerprint = isSelf ? me.fingerprint : contact?.fingerprint ?? ''
-  const sessionId = isSelf ? me.sessionId : contact?.sessionId ?? ''
+  // Resolve in order: active alias → any of my identities → anonymous contact.
+  const ownIdentity = id === 'anon-me' ? me : identities.find((a) => a.id === id)
+  const isSelf = !!ownIdentity
+  const source = ownIdentity ?? contact
+  const name = source?.name ?? 'Unknown'
+  const publicKey = source?.publicKey ?? ''
+  const fingerprint = source?.fingerprint ?? ''
+  const sessionId = source?.sessionId ?? ''
 
   return (
     <div className="sb-fill" data-anon="true">

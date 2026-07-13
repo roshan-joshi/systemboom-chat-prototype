@@ -31,6 +31,7 @@ import {
   useStore,
   useConversationList,
   conversationTitle,
+  latestMessage,
 } from '@/data/store'
 import type { Conversation } from '@/data/types'
 
@@ -63,10 +64,7 @@ export function ChatListScreen({ archived = false }: { archived?: boolean }) {
     })
   }, [list, filter, query, users])
 
-  const lastOf = (c: Conversation) => {
-    const id = c.messageIds[c.messageIds.length - 1]
-    return id ? state.messages[id] : undefined
-  }
+  const lastOf = (c: Conversation) => latestMessage(c, state.messages)
 
   const rowPreview = (c: Conversation) => {
     if (state.typing[c.id]) return <span style={{ color: 'var(--sb-online)' }}>typing…</span>

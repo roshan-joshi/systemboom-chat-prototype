@@ -21,7 +21,8 @@
       "Bash(curl -s \"https://roshan-joshi.github.io/test/?v=2\" -o sb-ref.html -w \"ref html: %{http_code} %{size_download} bytes\\\\n\")",
       "Bash(node -e ' *)",
       "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Brand alignment pass — apply SystemBoom identity *)",
-      "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Phase 4 — Conversation Commerce *)"
+      "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Phase 4 — Conversation Commerce *)",
+      "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Phase 4.1 — Stabilization sprint \\(audit fixes 1-7\\) *)"
     ]
   }
 }

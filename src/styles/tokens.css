@@ -199,7 +199,7 @@
 
   /* Brand accents */
   --sb-brand: var(--sb-red-600);        /* pure logo red for fills/glow */
-  --sb-gold: var(--sb-gold-600);        /* warm highlight (fuse) */
+  --sb-gold: var(--sb-gold-700);        /* warm highlight (fuse) — AA ≥4.5:1 on surfaces */
   --sb-gold-soft: #fbeecd;
   --sb-on-gold-soft: #8a5c05;
 

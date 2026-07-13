@@ -10,7 +10,6 @@ import {
   Pencil,
   Trash2,
   Pin,
-  Star,
   ShieldCheck,
   Info,
   Camera,
@@ -330,11 +329,20 @@ export function ConversationScreen() {
                   <Icon as={Forward} size="md" /> Forward
                 </button>
               )}
-              <button className="sb-actionsheet__item" onClick={() => { toast.show(actionFor.pinned ? 'Unpinned' : 'Pinned message'); setActionFor(null) }}>
+              <button
+                className="sb-actionsheet__item"
+                onClick={() => {
+                  store.togglePinMessage(actionFor.id)
+                  toast.show(actionFor.pinned ? 'Unpinned' : 'Message pinned', {
+                    action:
+                      actionFor.pinned || isAnon
+                        ? undefined
+                        : { label: 'View', onClick: () => navigate(`/chats/${id}/pinned`) },
+                  })
+                  setActionFor(null)
+                }}
+              >
                 <Icon as={Pin} size="md" /> {actionFor.pinned ? 'Unpin' : 'Pin'}
-              </button>
-              <button className="sb-actionsheet__item" onClick={() => { toast.show(actionFor.starred ? 'Unstarred' : 'Starred'); setActionFor(null) }}>
-                <Icon as={Star} size="md" /> Star
               </button>
               {isMineMsg && actionFor.type === 'text' && !actionFor.deleted && (
                 <button className="sb-actionsheet__item" onClick={() => { setEditing(actionFor); setDraft(actionFor.text ?? ''); setActionFor(null) }}>

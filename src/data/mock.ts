@@ -58,7 +58,7 @@ const T_SITA = build('c_sita', [
   { authorId: 'u_sita', type: 'text', text: 'Love that 🙌', at: ago(3 * HR - 6 * MIN), reactions: [{ emoji: '❤️', by: [ME] }] },
   { authorId: 'u_sita', type: 'voice', voice: { duration: '0:14', waveform: [3, 6, 9, 5, 8, 12, 7, 4, 9, 6, 3, 8, 11, 5, 7, 4, 6] }, at: ago(2 * HR) },
   { authorId: ME, type: 'text', text: 'Great summary. Let me fold that into the spec.', at: ago(2 * HR - 3 * MIN) },
-  { authorId: 'u_sita', type: 'image', image: { url: 'grad-1', caption: 'Latest palette exploration' }, at: ago(40 * MIN) },
+  { authorId: 'u_sita', type: 'image', image: { url: 'grad-1', caption: 'Latest palette exploration' }, at: ago(40 * MIN), pinned: true },
   { authorId: 'u_sita', type: 'text', text: 'Which one feels most “SystemBoom” to you?', at: ago(38 * MIN) },
   { authorId: ME, type: 'text', text: 'The indigo one. It reads trustworthy without being cold.', at: ago(9 * MIN), status: 'read' },
   { authorId: 'u_sita', type: 'text', text: 'Agreed. I’ll update the tokens 👇', at: ago(4 * MIN) },
@@ -200,8 +200,9 @@ export function keyMaterial(seed: string) {
 }
 
 // The device owner's own anonymous identity (active by default).
+// Note: 'anon-me' is reserved as the "active identity" route sentinel.
 export const MY_ANON = {
-  id: 'anon-me',
+  id: 'anon-primary',
   name: 'Amber Falcon 4821',
   ...keyMaterial('amber-falcon-4821'),
   createdAt: NOW - 3 * DAY,
@@ -285,18 +286,20 @@ export const ORDERS: Order[] = [
     status: 'shipped',
     paymentStatus: 'paid',
     paymentMethod: 'eSewa wallet',
-    createdAt: ago(2 * DAY),
+    createdAt: ago(20 * HR),
     tracking: { code: 'SB7731NP', courier: 'Boom Express' },
   },
 ]
 
 // Post the order lifecycle into the Boom Store conversation (PD-037).
+// Timestamps follow the negotiation (~22h ago) so the thread reads
+// inquiry → negotiation → order → payment → shipped, in order.
 const ORDER_MSGS = build('c_boom', [
-  { authorId: ME, type: 'system', text: 'Order #SB7731NP created · Rs 4,500', at: ago(2 * DAY) },
-  { authorId: ME, type: 'order', orderRef: { orderId: 'ord_demo' }, at: ago(2 * DAY - 30_000) },
-  { authorId: 'u_boom', type: 'system', text: 'Payment confirmed ✓', at: ago(2 * DAY - 60_000) },
-  { authorId: 'u_boom', type: 'text', text: 'Thank you! Packing now — I’ll share tracking shortly. 📦', at: ago(2 * DAY - 90_000) },
-  { authorId: 'u_boom', type: 'system', text: 'Item shipped · Boom Express (SB7731NP)', at: ago(1 * DAY) },
+  { authorId: ME, type: 'system', text: 'Order #SB7731NP created · Rs 4,500', at: ago(20 * HR) },
+  { authorId: ME, type: 'order', orderRef: { orderId: 'ord_demo' }, at: ago(20 * HR - 30_000) },
+  { authorId: 'u_boom', type: 'system', text: 'Payment confirmed ✓', at: ago(20 * HR - 60_000) },
+  { authorId: 'u_boom', type: 'text', text: 'Thank you! Packing now — I’ll share tracking shortly. 📦', at: ago(20 * HR - 90_000) },
+  { authorId: 'u_boom', type: 'system', text: 'Item shipped · Boom Express (SB7731NP)', at: ago(5 * HR) },
 ])
 MESSAGES.push(...ORDER_MSGS)
 {
@@ -310,5 +313,5 @@ export const NOTIFICATIONS: AppNotification[] = [
   { id: 'n3', kind: 'reaction', fromId: 'u_mom', title: 'Aama', body: 'reacted 😍 to your message', at: ago(3 * HR), read: false, conversationId: 'c_family' },
   { id: 'n4', kind: 'missed_call', fromId: 'u_prakash', title: 'Prakash Sharma', body: 'Missed voice call', at: ago(1 * DAY - 2 * HR), read: true, conversationId: 'c_prakash' },
   { id: 'n5', kind: 'group_invite', fromId: 'u_boom', title: 'Boom Sellers', body: 'You were added to the group', at: ago(7 * DAY), read: true, conversationId: 'c_announce' },
-  { id: 'n6', kind: 'order', fromId: 'u_boom', title: 'Boom Store', body: 'Item shipped · Boom Express (SB7731NP)', at: ago(1 * DAY), read: false, conversationId: 'c_boom' },
+  { id: 'n6', kind: 'order', fromId: 'u_boom', title: 'Boom Store', body: 'Item shipped · Boom Express (SB7731NP)', at: ago(5 * HR), read: false, conversationId: 'c_boom' },
 ]

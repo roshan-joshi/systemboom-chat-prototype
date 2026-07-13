@@ -152,7 +152,7 @@ export function resolveRoute(path: string): ResolvedRoute {
 /* Level-1 destinations — max 5 (DS-003 Bottom Navigation) — SM-001 Level 1. */
 export const NAV_ITEMS: NavItem[] = [
   { id: 'home', label: 'Home', icon: Home, to: '/home' },
-  { id: 'chats', label: 'Chats', icon: MessageSquare, to: '/chats', badge: 3 },
+  { id: 'chats', label: 'Chats', icon: MessageSquare, to: '/chats' }, // badge derived from store in AppShell
   { id: 'calls', label: 'Calls', icon: Phone, to: '/calls' },
   { id: 'marketplace', label: 'Market', icon: Store, to: '/marketplace' },
   { id: 'profile', label: 'Profile', icon: CircleUser, to: '/profile' },

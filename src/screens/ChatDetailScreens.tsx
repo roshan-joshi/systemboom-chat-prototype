@@ -10,7 +10,7 @@ import {
   FileText,
   Link2,
   Pin,
-  Star,
+  PinOff,
   Ban,
   Flag,
   LogOut,
@@ -23,6 +23,7 @@ import {
 import { useRouter, useParams } from '@/lib/router'
 import {
   TopAppBar,
+  IconButton,
   Avatar,
   Icon,
   Banner,
@@ -62,7 +63,6 @@ export function ChatInfoScreen() {
   const store = useStore()
   const other = useUser(conv?.kind === 'private' ? conv.userId : undefined)
   const toast = useToast()
-  const [announce, setAnnounce] = useState(!!conv?.announcementMode)
   const [confirm, setConfirm] = useState<null | 'block' | 'leave' | 'delete'>(null)
 
   if (!conv) return <div className="sb-fill"><TopAppBar title="Info" onBack={back} /></div>
@@ -129,11 +129,6 @@ export function ChatInfoScreen() {
               <span className="sb-settings-row__body"><span className="sb-settings-row__title">Pinned messages</span></span>
               <Icon as={ChevronRight} size="sm" />
             </button>
-            <button className="sb-settings-row sb-settings-row--btn" onClick={() => toast.show('Starred messages (prototype)')}>
-              <span className="sb-settings-row__icon"><Icon as={Star} size="sm" /></span>
-              <span className="sb-settings-row__body"><span className="sb-settings-row__title">Starred messages</span></span>
-              <Icon as={ChevronRight} size="sm" />
-            </button>
             <div className="sb-settings-row">
               <span className="sb-settings-row__icon"><Icon as={conv.muted ? BellOff : Bell} size="sm" /></span>
               <span className="sb-settings-row__body"><span className="sb-settings-row__title">Mute notifications</span></span>
@@ -152,7 +147,14 @@ export function ChatInfoScreen() {
                       <span className="sb-settings-row__title">Announcement mode</span>
                       <span className="sb-settings-row__sub">Only admins can post</span>
                     </span>
-                    <Switch checked={announce} onChange={(v) => { setAnnounce(v); toast.show(v ? 'Announcement mode on' : 'Announcement mode off') }} label="Announcement mode" />
+                    <Switch
+                      checked={!!conv.announcementMode}
+                      onChange={(v) => {
+                        store.setAnnouncementMode(id!, v)
+                        toast.show(v ? 'Announcement mode on — only admins can post' : 'Announcement mode off')
+                      }}
+                      label="Announcement mode"
+                    />
                   </div>
                 </div>
               )}
@@ -297,24 +299,34 @@ export function SharedMediaScreen() {
   )
 }
 
-/* SC-027 — Pinned Messages */
+/* SC-027 — Pinned Messages (live: unpin updates immediately) */
 export function PinnedMessagesScreen() {
   const { back } = useRouter()
   const { messages } = useConvFromRoute('/chats/:id/pinned')
   const store = useStore()
+  const toast = useToast()
   const pinned = messages.filter((m) => m.pinned)
   return (
     <div className="sb-fill">
-      <TopAppBar title="Pinned messages" onBack={back} />
+      <TopAppBar title="Pinned messages" subtitle={pinned.length ? `${pinned.length} pinned` : undefined} onBack={back} />
       <div className="sb-shell__main" data-scroll-region style={{ padding: 'var(--sb-space-4)' }}>
         {pinned.length ? pinned.map((m) => (
           <div key={m.id} className="sb-settings-group" style={{ marginBottom: 8 }}>
             <div className="sb-settings-row">
               <span className="sb-settings-row__icon"><Icon as={Pin} size="sm" /></span>
               <span className="sb-settings-row__body">
-                <span className="sb-settings-row__title">{store.state.users[m.authorId]?.name ?? 'You'}</span>
+                <span className="sb-settings-row__title">{m.authorId === store.me ? 'You' : store.state.users[m.authorId]?.name}</span>
                 <span className="sb-settings-row__sub">{previewOf(m)}</span>
               </span>
+              <IconButton
+                icon={PinOff}
+                label="Unpin message"
+                size="sm"
+                onClick={() => {
+                  store.togglePinMessage(m.id)
+                  toast.show('Unpinned')
+                }}
+              />
             </div>
           </div>
         )) : <EmptyState icon={Pin} title="No pinned messages" description="Long-press any message and choose Pin to keep it here for quick access." />}

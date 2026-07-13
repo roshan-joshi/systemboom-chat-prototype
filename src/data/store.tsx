@@ -247,6 +247,8 @@ interface StoreApi {
   setDraft: (conversationId: ID, draft: string) => void
   togglePin: (id: ID) => void
   toggleMute: (id: ID) => void
+  setAnnouncementMode: (id: ID, on: boolean) => void
+  togglePinMessage: (messageId: ID) => void
   toggleArchive: (id: ID) => void
   markRead: (conversationId: ID) => void
   createGroup: (
@@ -338,6 +340,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       toggleMute: (id) => {
         const c = state.conversations.find((x) => x.id === id)
         dispatch({ type: 'patch_conversation', id, patch: { muted: !c?.muted } })
+      },
+      setAnnouncementMode: (id, on) =>
+        dispatch({ type: 'patch_conversation', id, patch: { announcementMode: on } }),
+      togglePinMessage: (messageId) => {
+        const m = state.messages[messageId]
+        if (m) dispatch({ type: 'update_message', id: messageId, patch: { pinned: !m.pinned } })
       },
       toggleArchive: (id) => {
         const c = state.conversations.find((x) => x.id === id)
@@ -497,7 +505,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
       payOrder: (orderId, method) => {
         const order = state.orders[orderId]
-        if (!order) return
+        if (!order || order.paymentStatus === 'paid') return // never pay twice
         const tracking = { code: 'SB' + String(1000 + Math.floor(Math.random() * 9000)) + 'NP', courier: 'Boom Express' }
         dispatch({ type: 'patch_order', id: orderId, patch: { paymentStatus: 'paid', status: 'confirmed', paymentMethod: method, tracking } })
         const cid = order.conversationId
@@ -550,10 +558,7 @@ export function useConversationList(opts?: {
   const { state } = useStore()
   const env = opts?.env ?? 'registered'
   return useMemo(() => {
-    const lastAt = (c: Conversation) => {
-      const last = c.messageIds[c.messageIds.length - 1]
-      return last ? state.messages[last]?.createdAt ?? 0 : 0
-    }
+    const lastAt = (c: Conversation) => latestMessage(c, state.messages)?.createdAt ?? 0
     return state.conversations
       .filter((c) => (c.env ?? 'registered') === env)
       .filter((c) => (opts?.archived ? c.archived : !c.archived))
@@ -604,8 +609,24 @@ export function useMessages(conversationId?: ID): Message[] {
   return useMemo(() => {
     const conv = state.conversations.find((c) => c.id === conversationId)
     if (!conv) return []
-    return conv.messageIds.map((mid) => state.messages[mid]).filter(Boolean)
+    return conv.messageIds
+      .map((mid) => state.messages[mid])
+      .filter(Boolean)
+      .sort((a, b) => a.createdAt - b.createdAt) // chronological, regardless of insertion order
   }, [state.conversations, state.messages, conversationId])
+}
+
+/** Most recent message of a conversation by timestamp (not insertion order). */
+export function latestMessage(
+  conv: Conversation,
+  messages: Record<ID, Message>,
+): Message | undefined {
+  let latest: Message | undefined
+  for (const mid of conv.messageIds) {
+    const m = messages[mid]
+    if (m && (!latest || m.createdAt > latest.createdAt)) latest = m
+  }
+  return latest
 }
 
 /** Display title + subtitle for a conversation (private → user, group → title). */

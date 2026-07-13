@@ -231,6 +231,33 @@ export function PaymentScreen() {
 
   if (!order) return <div className="sb-fill"><TopAppBar title="Payment" onBack={back} /></div>
 
+  // Already paid — show the completed state; never offer a second payment.
+  if (order.paymentStatus === 'paid') {
+    return (
+      <div className="sb-fill">
+        <TopAppBar title="Payment" onBack={back} />
+        <div className="sb-shell__main" data-scroll-region>
+          <div className="sb-content sb-block" style={{ alignItems: 'center', textAlign: 'center', paddingTop: 'var(--sb-space-8)' }}>
+            <span style={{ width: 72, height: 72, borderRadius: '50%', display: 'grid', placeItems: 'center', background: 'var(--sb-success-soft)', color: 'var(--sb-success)' }}>
+              <Icon as={Check} size={36} />
+            </span>
+            <div>
+              <h2 style={{ fontSize: 'var(--sb-text-title)', fontWeight: 700 }}>Payment complete</h2>
+              <p style={{ color: 'var(--sb-text-secondary)', marginTop: 6 }}>
+                {money(order.finalPrice)} · {order.paymentMethod}
+              </p>
+            </div>
+            <div className="sb-securebar"><Icon as={ShieldCheck} size="sm" /> This order has already been paid.</div>
+            <div className="sb-col sb-gap-3" style={{ width: '100%', maxWidth: 360 }}>
+              <Button block onClick={() => navigate(`/orders/${order.id}`)}>View order</Button>
+              <Button variant="secondary" block iconStart={MessageSquare} onClick={() => navigate(`/chats/${order.conversationId}`)}>Back to conversation</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const pay = () => {
     setPaying(true)
     window.setTimeout(() => {

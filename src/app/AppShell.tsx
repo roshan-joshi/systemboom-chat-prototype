@@ -1,20 +1,37 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Palette } from 'lucide-react'
 import { useRouter, Link } from '@/lib/router'
 import { useBreakpoint } from '@/lib/hooks'
 import { BottomNav, NavRail, BrandMark, Tooltip } from '@/components'
+import { useStore } from '@/data/store'
 import { resolveRoute, NAV_ITEMS, ANON_NAV_ITEMS, isAnonPath } from './routes'
 
 export function AppShell() {
   const { path, query } = useRouter()
   const breakpoint = useBreakpoint()
+  const { state } = useStore()
   const { route } = resolveRoute(path)
   // Include query so query-differentiated screens (e.g. call kind) remount.
   const pageKey = query.toString() ? `${path}?${query.toString()}` : path
 
   // Anonymous environment (PD-033): distinct nav + violet accent.
   const anon = isAnonPath(path)
-  const navItems = anon ? ANON_NAV_ITEMS : NAV_ITEMS
+
+  // Live unread total for the Chats destination (hidden at zero).
+  const unreadChats = useMemo(
+    () =>
+      state.conversations
+        .filter((c) => (c.env ?? 'registered') === 'registered' && !c.archived)
+        .reduce((sum, c) => sum + c.unread, 0),
+    [state.conversations],
+  )
+  const navItems = useMemo(
+    () =>
+      (anon ? ANON_NAV_ITEMS : NAV_ITEMS).map((item) =>
+        item.id === 'chats' && unreadChats > 0 ? { ...item, badge: unreadChats } : item,
+      ),
+    [anon, unreadChats],
+  )
 
   // Keep the document title in sync with the active screen.
   useEffect(() => {
