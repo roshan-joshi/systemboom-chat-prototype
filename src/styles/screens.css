@@ -54,6 +54,25 @@
   }
 }
 
+/* Offline banner (SM-004 No-Internet recovery) */
+.sb-offline-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px var(--sb-space-4);
+  background: var(--sb-warning-soft);
+  color: var(--sb-on-warning-soft);
+  font-size: var(--sb-text-label);
+  font-weight: var(--sb-weight-semibold);
+  flex-shrink: 0;
+  animation: sb-fade-down var(--sb-duration-base) var(--sb-ease-decelerate) both;
+}
+@keyframes sb-fade-down {
+  from { opacity: 0; transform: translateY(-100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* Page transition */
 .sb-page {
   animation: sb-page-in var(--sb-duration-base) var(--sb-ease-decelerate) both;

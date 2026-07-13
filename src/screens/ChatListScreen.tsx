@@ -25,8 +25,10 @@ import {
   EmptyState,
   Icon,
   previewOf,
+  ConversationListSkeleton,
   useToast,
 } from '@/components'
+import { useFirstLoad } from '@/lib/hooks'
 import {
   useStore,
   useConversationList,
@@ -45,6 +47,7 @@ export function ChatListScreen({ archived = false }: { archived?: boolean }) {
   const list = useConversationList({ archived })
   const archivedCount = state.conversations.filter((c) => c.archived).length
 
+  const loading = useFirstLoad(archived ? 'archived' : 'chats')
   const [filter, setFilter] = useState<Filter>('all')
   const [query, setQuery] = useState('')
   const [menuFor, setMenuFor] = useState<Conversation | null>(null)
@@ -116,6 +119,10 @@ export function ChatListScreen({ archived = false }: { archived?: boolean }) {
       )}
 
       <div className="sb-shell__main" data-scroll-region style={{ padding: 'var(--sb-space-1) var(--sb-space-2) var(--sb-space-10)' }}>
+        {loading ? (
+          <ConversationListSkeleton />
+        ) : (
+        <>
         {!archived && archivedCount > 0 && filter === 'all' && !query && (
           <button className="sb-convo" onClick={() => navigate('/archived')} style={{ color: 'var(--sb-text-secondary)' }}>
             <span className="sb-settings-row__icon" style={{ width: 44, height: 44, borderRadius: '50%' }}>
@@ -131,8 +138,14 @@ export function ChatListScreen({ archived = false }: { archived?: boolean }) {
         {filtered.length === 0 ? (
           <div style={{ paddingTop: 40 }}>
             <EmptyState
-              icon={query ? Search : MessageSquare}
-              title={query ? 'No matches' : archived ? 'No archived chats' : filter === 'unread' ? 'You’re all caught up' : 'No conversations yet'}
+              icon={query ? Search : filter === 'groups' ? Users : MessageSquare}
+              title={
+                query ? 'No matches'
+                : archived ? 'No archived chats'
+                : filter === 'unread' ? 'You’re all caught up'
+                : filter === 'groups' ? 'No group chats yet'
+                : 'No conversations yet'
+              }
               description={
                 query
                   ? 'Try a different name or keyword.'
@@ -140,9 +153,10 @@ export function ChatListScreen({ archived = false }: { archived?: boolean }) {
                     ? 'Chats you archive will appear here, out of the way but never lost.'
                     : filter === 'unread'
                       ? 'Every conversation is read. Enjoy the calm.'
-                      : 'Start your first conversation — everything in SystemBoom begins with a chat.'
+                      : filter === 'groups'
+                        ? 'Create a group to collaborate with several people in one conversation.'
+                        : 'Start your first conversation — everything in SystemBoom begins with a chat.'
               }
-              action={!query && !archived && filter === 'all' ? undefined : undefined}
             />
           </div>
         ) : (
@@ -171,6 +185,8 @@ export function ChatListScreen({ archived = false }: { archived?: boolean }) {
               />
             )
           })
+        )}
+        </>
         )}
       </div>
 

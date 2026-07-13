@@ -103,6 +103,25 @@ export function useFocusTrap<T extends HTMLElement>(active = true) {
   return ref
 }
 
+/**
+ * Returns true the first time a given key is mounted this session, for `ms`,
+ * then false. Lets a screen show a real loading skeleton once without making
+ * every navigation feel slow (DS-001: never wait unnecessarily).
+ */
+const firstLoadSeen = new Set<string>()
+export function useFirstLoad(key: string, ms = 480): boolean {
+  const [loading, setLoading] = useState(() => !firstLoadSeen.has(key))
+  useEffect(() => {
+    if (firstLoadSeen.has(key)) return
+    const t = window.setTimeout(() => {
+      firstLoadSeen.add(key)
+      setLoading(false)
+    }, ms)
+    return () => window.clearTimeout(t)
+  }, [key, ms])
+  return loading
+}
+
 /** Persisted state backed by localStorage. */
 export function usePersistentState<T>(key: string, initial: T): [T, (v: T) => void] {
   const [state, setState] = useState<T>(() => {

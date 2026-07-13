@@ -1,10 +1,31 @@
-import { useEffect, useMemo } from 'react'
-import { Palette } from 'lucide-react'
+import { useEffect, useMemo, useRef } from 'react'
+import { Palette, CloudOff } from 'lucide-react'
 import { useRouter, Link } from '@/lib/router'
 import { useBreakpoint } from '@/lib/hooks'
-import { BottomNav, NavRail, BrandMark, Tooltip } from '@/components'
+import { useConnectivity } from '@/lib/connectivity'
+import { BottomNav, NavRail, BrandMark, Tooltip, Icon, useToast } from '@/components'
 import { useStore } from '@/data/store'
 import { resolveRoute, NAV_ITEMS, ANON_NAV_ITEMS, isAnonPath } from './routes'
+
+/** Sticky offline strip + reconnect toast (SM-004 No-Internet recovery). */
+function OfflineBanner() {
+  const { effectiveOnline } = useConnectivity()
+  const toast = useToast()
+  const wasOffline = useRef(false)
+  useEffect(() => {
+    if (!effectiveOnline) wasOffline.current = true
+    else if (wasOffline.current) {
+      wasOffline.current = false
+      toast.success('Back online')
+    }
+  }, [effectiveOnline, toast])
+  if (effectiveOnline) return null
+  return (
+    <div className="sb-offline-bar" role="status" aria-live="polite">
+      <Icon as={CloudOff} size={14} /> You’re offline — messages will send when you reconnect
+    </div>
+  )
+}
 
 export function AppShell() {
   const { path, query } = useRouter()
@@ -51,6 +72,7 @@ export function AppShell() {
       <div className="sb-app">
         <div className="sb-frame">
           <main className="sb-shell" id="main" data-scroll-region>
+            <OfflineBanner />
             <div className="sb-shell__main" data-scroll-region data-fill="true">
               <div key={pageKey} className="sb-page sb-fill">
                 {route.element}
@@ -92,6 +114,7 @@ export function AppShell() {
         )}
 
         <main className="sb-shell" id="main">
+          <OfflineBanner />
           <div className="sb-shell__main" data-scroll-region data-fill="true">
             <div key={pageKey} className="sb-page sb-fill">
               {route.element}

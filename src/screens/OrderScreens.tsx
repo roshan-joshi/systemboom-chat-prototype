@@ -15,9 +15,11 @@ import {
   Star,
   Package,
   ChevronRight,
+  AlertTriangle,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useRouter, useParams } from '@/lib/router'
+import { useOnline } from '@/lib/connectivity'
 import {
   TopAppBar,
   Icon,
@@ -226,8 +228,10 @@ export function PaymentScreen() {
   const order = useOrder(id)
   const store = useStore()
   const toast = useToast()
+  const online = useOnline()
   const [method, setMethod] = useState('eSewa wallet')
   const [paying, setPaying] = useState(false)
+  const [failed, setFailed] = useState(false)
 
   if (!order) return <div className="sb-fill"><TopAppBar title="Payment" onBack={back} /></div>
 
@@ -259,8 +263,15 @@ export function PaymentScreen() {
   }
 
   const pay = () => {
+    setFailed(false)
     setPaying(true)
     window.setTimeout(() => {
+      setPaying(false)
+      // Payment can't complete without a connection (SM-004 Payment Failure).
+      if (!online) {
+        setFailed(true)
+        return
+      }
       store.payOrder(order.id, method)
       toast.success('Payment confirmed')
       navigate(`/chats/${order.conversationId}`, { replace: true })
@@ -293,6 +304,12 @@ export function PaymentScreen() {
             </div>
           </div>
 
+          {failed && (
+            <Banner tone="error" icon={AlertTriangle}>
+              <strong>Payment couldn’t be completed.</strong> Check your connection and try again — you haven’t been charged.
+            </Banner>
+          )}
+
           <div className="sb-securebar">
             <Icon as={ShieldCheck} size="sm" /> Secured by SystemBoom Pay · details are never stored or shown in chat
           </div>
@@ -300,7 +317,7 @@ export function PaymentScreen() {
       </div>
       <div className="sb-composer" style={{ borderTop: '1px solid var(--sb-border-subtle)' }}>
         <Button size="lg" block loading={paying} onClick={pay}>
-          {paying ? 'Processing…' : method === 'Cash on delivery' ? 'Confirm order' : `Pay ${money(order.finalPrice)}`}
+          {paying ? 'Processing…' : failed ? 'Try again' : method === 'Cash on delivery' ? 'Confirm order' : `Pay ${money(order.finalPrice)}`}
         </Button>
       </div>
     </div>

@@ -102,6 +102,30 @@
 }
 .sb-msgrow--out { align-self: flex-end; flex-direction: row-reverse; }
 .sb-msgrow--in { align-self: flex-start; }
+
+/* Hover-revealed message-options affordance (discoverability on pointer devices).
+   Long-press / right-click / keyboard remain the primary paths on touch. */
+.sb-bubble-more {
+  align-self: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--sb-text-tertiary);
+  opacity: 0;
+  transition: opacity var(--sb-duration-fast) var(--sb-ease-standard),
+    background var(--sb-duration-fast) var(--sb-ease-standard);
+}
+.sb-bubble-more:hover { background: var(--sb-surface-hover); color: var(--sb-text-secondary); }
+@media (hover: none) {
+  .sb-bubble-more { display: none; } /* touch uses long-press */
+}
+@media (hover: hover) {
+  .sb-msgrow:hover .sb-bubble-more,
+  .sb-msgrow:focus-within .sb-bubble-more { opacity: 1; }
+}
 .sb-msgrow__avatar { align-self: flex-end; flex-shrink: 0; }
 .sb-msgrow--grouped { margin-top: 1px; }
 .sb-msgrow--first { margin-top: var(--sb-space-2); }
@@ -146,6 +170,20 @@
   color: var(--sb-text-tertiary);
   margin: 3px 2px 0;
 }
+.sb-msg-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-end;
+  margin: 4px 2px 0;
+  padding: 3px 9px;
+  border-radius: var(--sb-radius-pill);
+  background: var(--sb-error-soft);
+  color: var(--sb-error);
+  font-size: var(--sb-text-label);
+  font-weight: var(--sb-weight-semibold);
+}
+.sb-msg-retry:hover { filter: brightness(0.97); }
 
 .sb-bubble__sender {
   font-size: var(--sb-text-label);

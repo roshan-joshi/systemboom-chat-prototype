@@ -239,8 +239,12 @@ const REPLIES = [
 interface StoreApi {
   state: State
   me: ID
-  sendMessage: (conversationId: ID, partial: Partial<Message> & { type: Message['type'] }) => void
-  retryMessage: (id: ID) => void
+  sendMessage: (
+    conversationId: ID,
+    partial: Partial<Message> & { type: Message['type'] },
+    online?: boolean,
+  ) => void
+  retryMessage: (id: ID, online?: boolean) => void
   react: (id: ID, emoji: string) => void
   deleteMessage: (id: ID, forEveryone: boolean) => void
   editMessage: (id: ID, text: string) => void
@@ -280,7 +284,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const idRef = useRef(1000)
   const nextId = () => `m${++idRef.current}`
 
-  const sendMessage = useCallback<StoreApi['sendMessage']>((conversationId, partial) => {
+  const sendMessage = useCallback<StoreApi['sendMessage']>((conversationId, partial, online = true) => {
     const id = nextId()
     const message: Message = {
       status: 'sending',
@@ -291,6 +295,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       createdAt: Date.now(),
     }
     dispatch({ type: 'add_message', message })
+
+    // Offline: the send cannot complete — fail gracefully so the user can retry
+    // (SM-004 "No Internet", PS-001 send failure, PD-046 recovery).
+    if (!online) {
+      window.setTimeout(() => dispatch({ type: 'set_status', id, status: 'failed' }), 700)
+      return
+    }
+
     // Optimistic status progression.
     window.setTimeout(() => dispatch({ type: 'set_status', id, status: 'sent' }), 450)
     window.setTimeout(() => dispatch({ type: 'set_status', id, status: 'delivered' }), 1100)
@@ -322,8 +334,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       state,
       me: ME,
       sendMessage,
-      retryMessage: (id) => {
+      retryMessage: (id, online = true) => {
         dispatch({ type: 'set_status', id, status: 'sending' })
+        if (!online) {
+          window.setTimeout(() => dispatch({ type: 'set_status', id, status: 'failed' }), 700)
+          return
+        }
         window.setTimeout(() => dispatch({ type: 'set_status', id, status: 'sent' }), 500)
         window.setTimeout(() => dispatch({ type: 'set_status', id, status: 'delivered' }), 1100)
       },

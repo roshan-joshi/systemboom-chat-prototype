@@ -49,7 +49,7 @@ src/
 | 2 | Registered communication — chat list, private/group chat, new chat, search, calls, notifications, settings | ✅ Complete |
 | 3 | Anonymous communication — identity, QR pairing, anonymous chats/groups, identity switching & manager | ✅ Complete |
 | 4 | Conversation commerce — marketplace, product, offers, orders, payment, tracking, reviews | ✅ Complete |
-| 5 | Polish — motion, transitions, empty/loading/error/offline states | ⏳ Planned |
+| 5 | Polish — loading skeletons, offline + error recovery, empty states, motion, accessibility | ✅ Complete |
 
 ### Phase 2 highlights
 

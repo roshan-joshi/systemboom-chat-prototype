@@ -22,7 +22,9 @@
       "Bash(node -e ' *)",
       "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Brand alignment pass — apply SystemBoom identity *)",
       "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Phase 4 — Conversation Commerce *)",
-      "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Phase 4.1 — Stabilization sprint \\(audit fixes 1-7\\) *)"
+      "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Phase 4.1 — Stabilization sprint \\(audit fixes 1-7\\) *)",
+      "Bash(perl -pi -e 's/\\\\}\\\\\\); setAttachOpen\\\\\\(false\\\\\\)/}, online\\); setAttachOpen\\(false\\)/g' src/screens/ConversationScreen.tsx)",
+      "Bash(git -c user.name=roshan-joshi -c user.email=systemboom.dev1@gmail.com commit -q -m 'Phase 5 — Polish \\(loading, offline, error recovery, motion, a11y\\) *)"
     ]
   }
 }

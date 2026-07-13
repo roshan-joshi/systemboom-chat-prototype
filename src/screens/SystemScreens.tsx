@@ -23,6 +23,7 @@ import {
   KeyRound,
   Eye,
   Package,
+  CloudOff,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useRouter, useParams } from '@/lib/router'
@@ -41,6 +42,7 @@ import {
   useToast,
 } from '@/components'
 import { useStore } from '@/data/store'
+import { useConnectivity } from '@/lib/connectivity'
 import { callTime } from '@/data/format'
 import type { NotificationKind } from '@/data/types'
 
@@ -139,6 +141,7 @@ export function SettingsScreen() {
   const store = useStore()
   const me = store.state.users.me
   const toast = useToast()
+  const { simulateOffline, setSimulateOffline } = useConnectivity()
   const [signOut, setSignOut] = useState(false)
 
   return (
@@ -171,6 +174,17 @@ export function SettingsScreen() {
             { icon: CircleHelp, title: 'Help', sub: 'FAQ & support', onClick: () => toast.show('Help centre (prototype)') },
             { icon: Info, title: 'About', sub: 'SystemBoom Chat · Prototype', onClick: () => toast.show('SystemBoom Chat — Phase 2') },
           ]} />
+
+          <p className="sb-section-label">Prototype</p>
+          <div className="sb-settings-group">
+            <ToggleRow
+              icon={CloudOff}
+              title="Simulate offline"
+              sub="Demo the offline & retry experience"
+              checked={simulateOffline}
+              onChange={(v) => { setSimulateOffline(v); toast.show(v ? 'Offline mode simulated' : 'Back online') }}
+            />
+          </div>
 
           <Group rows={[{ icon: LogOut, title: 'Sign out', danger: true, onClick: () => setSignOut(true) }]} />
         </div>

@@ -289,6 +289,7 @@ export function ChatBubble({
   me,
   onOpenActions,
   onJumpToReply,
+  onRetry,
 }: {
   message: Message
   author?: User
@@ -300,6 +301,7 @@ export function ChatBubble({
   me: string
   onOpenActions: (m: Message) => void
   onJumpToReply?: (id: string) => void
+  onRetry?: (m: Message) => void
 }) {
   const m = message
   const longPress = useLongPress(() => onOpenActions(m))
@@ -379,8 +381,23 @@ export function ChatBubble({
             {isMine && <StatusTicks status={m.status} />}
           </span>
         )}
+        {isMine && m.status === 'failed' && !m.deleted && (
+          <button className="sb-msg-retry" onClick={() => onRetry?.(m)}>
+            <Icon as={AlertCircle} size={12} /> Not delivered · Tap to retry
+          </button>
+        )}
         <Reactions message={m} me={me} />
       </div>
+      {!m.deleted && (
+        <button
+          className="sb-bubble-more"
+          aria-label="Message options"
+          tabIndex={-1}
+          onClick={() => onOpenActions(m)}
+        >
+          <Icon as={MoreHorizontal} size="sm" />
+        </button>
+      )}
     </div>
   )
 }

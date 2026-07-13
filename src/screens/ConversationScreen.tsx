@@ -41,6 +41,7 @@ import {
   useToast,
 } from '@/components'
 import { useStore, useConversation, useMessages, useUser } from '@/data/store'
+import { useOnline } from '@/lib/connectivity'
 import { productGradient, money } from '@/components/commerce'
 import { dayLabel } from '@/data/format'
 import type { Message } from '@/data/types'
@@ -58,6 +59,7 @@ export function ConversationScreen() {
   const messages = useMessages(id)
   const other = useUser(conv?.kind === 'private' ? conv.userId : undefined)
   const toast = useToast()
+  const online = useOnline()
 
   const [draft, setDraft] = useState('')
   const [replyTo, setReplyTo] = useState<Message | null>(null)
@@ -119,6 +121,7 @@ export function ConversationScreen() {
             replyTo={replyMsg}
             replyAuthor={replyMsg ? store.state.users[replyMsg.authorId] : undefined}
             onOpenActions={setActionFor}
+            onRetry={(msg) => store.retryMessage(msg.id, online)}
             onJumpToReply={(mid) => {
               const el = document.getElementById(`msg-${mid}`)
               el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -162,18 +165,18 @@ export function ConversationScreen() {
       store.editMessage(editing.id, text)
       setEditing(null)
     } else {
-      store.sendMessage(id!, { type: 'text', text, replyToId: replyTo?.id })
+      store.sendMessage(id!, { type: 'text', text, replyToId: replyTo?.id }, online)
     }
     setDraft('')
     setReplyTo(null)
   }
 
   const attachOptions = [
-    { label: 'Gallery', icon: ImageIcon, color: 'linear-gradient(135deg,#e5392b,#b21c13)', onSelect: () => { store.sendMessage(id!, { type: 'image', image: { url: 'grad-3', caption: '' } }); setAttachOpen(false) } },
-    { label: 'Camera', icon: Camera, color: 'linear-gradient(135deg,#e05353,#cc3f3f)', onSelect: () => { store.sendMessage(id!, { type: 'image', image: { url: 'grad-1' } }); setAttachOpen(false) } },
-    { label: 'Document', icon: FileText, color: 'linear-gradient(135deg,#2f7ee0,#2668bd)', onSelect: () => { store.sendMessage(id!, { type: 'document', document: { name: 'Shared-notes.pdf', size: '840 KB', ext: 'PDF' } }); setAttachOpen(false) } },
-    { label: 'Location', icon: MapPin, color: 'linear-gradient(135deg,#1fa971,#178a5c)', onSelect: () => { store.sendMessage(id!, { type: 'location', location: { label: 'My location', area: 'Kathmandu, Nepal' } }); setAttachOpen(false) } },
-    { label: 'Contact', icon: ContactIcon, color: 'linear-gradient(135deg,#d9930b,#b87a09)', onSelect: () => { store.sendMessage(id!, { type: 'contact', contact: { name: 'Rojan KC', phone: '+977 9806 789 012' } }); setAttachOpen(false) } },
+    { label: 'Gallery', icon: ImageIcon, color: 'linear-gradient(135deg,#e5392b,#b21c13)', onSelect: () => { store.sendMessage(id!, { type: 'image', image: { url: 'grad-3', caption: '' } }, online); setAttachOpen(false) } },
+    { label: 'Camera', icon: Camera, color: 'linear-gradient(135deg,#e05353,#cc3f3f)', onSelect: () => { store.sendMessage(id!, { type: 'image', image: { url: 'grad-1' } }, online); setAttachOpen(false) } },
+    { label: 'Document', icon: FileText, color: 'linear-gradient(135deg,#2f7ee0,#2668bd)', onSelect: () => { store.sendMessage(id!, { type: 'document', document: { name: 'Shared-notes.pdf', size: '840 KB', ext: 'PDF' } }, online); setAttachOpen(false) } },
+    { label: 'Location', icon: MapPin, color: 'linear-gradient(135deg,#1fa971,#178a5c)', onSelect: () => { store.sendMessage(id!, { type: 'location', location: { label: 'My location', area: 'Kathmandu, Nepal' } }, online); setAttachOpen(false) } },
+    { label: 'Contact', icon: ContactIcon, color: 'linear-gradient(135deg,#d9930b,#b87a09)', onSelect: () => { store.sendMessage(id!, { type: 'contact', contact: { name: 'Rojan KC', phone: '+977 9806 789 012' } }, online); setAttachOpen(false) } },
     { label: 'Product', icon: ShoppingBag, color: 'linear-gradient(135deg,#c88a00,#9a6a00)', onSelect: () => { setAttachOpen(false); setProductPicker(true) } },
   // Commerce (Product) is not available in anonymous mode (PS-004 scope).
   ].filter((o) => !isAnon || o.label !== 'Product')

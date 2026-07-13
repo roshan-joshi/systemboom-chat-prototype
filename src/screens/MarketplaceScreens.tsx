@@ -30,6 +30,7 @@ import {
   OrderStatusPill,
   productGradient,
   money,
+  MarketplaceGridSkeleton,
   useToast,
 } from '@/components'
 import {
@@ -39,6 +40,7 @@ import {
   useOrders,
   useUser,
 } from '@/data/store'
+import { useFirstLoad } from '@/lib/hooks'
 
 const CATEGORIES = ['All', 'Home', 'Apparel', 'Tech', 'Craft']
 
@@ -47,6 +49,7 @@ export function MarketplaceScreen() {
   const { navigate } = useRouter()
   const store = useStore()
   const products = useProducts()
+  const loading = useFirstLoad('marketplace')
   const [cat, setCat] = useState('All')
   const [query, setQuery] = useState('')
 
@@ -78,17 +81,23 @@ export function MarketplaceScreen() {
         <Banner tone="info" icon={MessageSquare}>
           Every product opens a conversation with its seller — discuss, negotiate, then buy without leaving chat.
         </Banner>
-        <div className="sb-mkt-grid" style={{ marginTop: 'var(--sb-space-4)' }}>
-          {filtered.map((p) => (
-            <ProductGridCard
-              key={p.id}
-              product={p}
-              sellerName={store.state.users[p.sellerId]?.name ?? 'Seller'}
-              onClick={() => navigate(`/marketplace/product/${p.id}`)}
-            />
-          ))}
+        <div style={{ marginTop: 'var(--sb-space-4)' }}>
+          {loading ? (
+            <MarketplaceGridSkeleton />
+          ) : (
+            <div className="sb-mkt-grid">
+              {filtered.map((p) => (
+                <ProductGridCard
+                  key={p.id}
+                  product={p}
+                  sellerName={store.state.users[p.sellerId]?.name ?? 'Seller'}
+                  onClick={() => navigate(`/marketplace/product/${p.id}`)}
+                />
+              ))}
+            </div>
+          )}
         </div>
-        {filtered.length === 0 && (
+        {!loading && filtered.length === 0 && (
           <div style={{ paddingTop: 30 }}>
             <EmptyState icon={Search} title="No products found" description="Try a different search or category." />
           </div>
