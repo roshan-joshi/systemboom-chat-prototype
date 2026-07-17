@@ -95,7 +95,7 @@ export function NewChatScreen() {
             <Avatar name={u.name} kind={u.business ? 'business' : 'user'} size="lg" presence={u.presence} />
             <span className="sb-convo__body">
               <span className="sb-convo__name">
-                {u.name}
+                <span className="sb-name-text">{u.name}</span>
                 {u.verified && <Icon as={Check} size={13} className="sb-inline-verified" label="Verified" />}
               </span>
               <span className="sb-convo__preview">{u.about ?? u.phone ?? 'SystemBoom user'}</span>

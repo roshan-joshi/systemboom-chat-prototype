@@ -140,7 +140,7 @@ export function ConversationListItem({
       <span className="sb-convo__body">
         <span className="sb-convo__top">
           <span className="sb-convo__name">
-            {title}
+            <span className="sb-name-text">{title}</span>
             {privateMode && (
               <Icon
                 as={Lock}
@@ -479,6 +479,7 @@ export function MessageComposer({
   locked,
   lockedLabel,
   placeholder = 'Message',
+  privateIndicator,
 }: {
   value: string
   onChange: (v: string) => void
@@ -491,6 +492,8 @@ export function MessageComposer({
   locked?: boolean
   lockedLabel?: string
   placeholder?: string
+  /** Private (E2EE) conversation — shows a restrained lock at the input (5.1D). */
+  privateIndicator?: boolean
 }) {
   const ref = useRef<HTMLTextAreaElement>(null)
   useEffect(() => {
@@ -529,6 +532,15 @@ export function MessageComposer({
       <div className="sb-composer__row">
         <div className="sb-composer__field">
           <IconButton icon={Plus} label="Add attachment" onClick={onAttach} />
+          {privateIndicator && (
+            <span
+              className="sb-composer__lock"
+              role="img"
+              aria-label="Private end-to-end encrypted conversation"
+            >
+              <Icon as={Lock} size={14} />
+            </span>
+          )}
           <textarea
             ref={ref}
             className="sb-composer__input"

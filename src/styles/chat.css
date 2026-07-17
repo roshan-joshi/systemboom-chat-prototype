@@ -215,6 +215,14 @@
 .sb-inline-verified { color: var(--sb-primary); flex-shrink: 0; vertical-align: middle; }
 /* Private (E2EE) mode lock — steel trust accent; shape + label, never color alone */
 .sb-lock-private { color: var(--sb-info); flex-shrink: 0; vertical-align: middle; }
+
+/* Name text truncates on its own; trailing lock/verified badges never clip (5.1D). */
+.sb-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .sb-convo__name { display: inline-flex; align-items: center; gap: 4px; }
 .sb-convo__pin { color: var(--sb-text-tertiary); }
 
@@ -387,6 +395,15 @@
   transition: border-color var(--sb-duration-fast) var(--sb-ease-standard);
 }
 .sb-composer__field:focus-within { border-color: var(--sb-primary); background: var(--sb-surface); }
+.sb-composer__lock {
+  align-self: center;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--sb-info);
+  padding-right: 2px;
+}
+
 .sb-composer__input {
   flex: 1; min-width: 0; border: none; outline: none; background: transparent;
   resize: none; font-size: var(--sb-text-body); line-height: 1.4;
@@ -419,6 +436,14 @@
 /* chat header presence line */
 .sb-chathead { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; text-align: left; }
 .sb-chathead__body { min-width: 0; }
-.sb-chathead__name { font-size: var(--sb-text-title); font-weight: var(--sb-weight-bold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; }
+.sb-chathead__name {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-size: var(--sb-text-title);
+  font-weight: var(--sb-weight-bold);
+  letter-spacing: -0.01em;
+}
 .sb-chathead__status { font-size: var(--sb-text-label); color: var(--sb-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
 .sb-chathead__status--online { color: var(--sb-online); }

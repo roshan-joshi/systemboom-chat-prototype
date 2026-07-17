@@ -206,7 +206,7 @@ export function ConversationScreen() {
             />
             <span className="sb-chathead__body">
               <span className="sb-chathead__name">
-                {title}
+                <span className="sb-name-text">{title}</span>
                 {isPriv && (
                   <Icon as={Lock} size={14} className="sb-lock-private" label="Private — end-to-end encrypted" />
                 )}
@@ -269,6 +269,7 @@ export function ConversationScreen() {
         locked={announceLocked}
         lockedLabel="Only admins can post in Announcement Mode"
         placeholder={editing ? 'Edit message' : isPriv ? 'Private message' : 'Message'}
+        privateIndicator={isPriv}
       />
 
       {/* Attachments */}
