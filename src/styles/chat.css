@@ -213,6 +213,8 @@
 .sb-ticks--read { color: #8fd0ff; }
 .sb-ticks--fail { color: var(--sb-error); }
 .sb-inline-verified { color: var(--sb-primary); flex-shrink: 0; vertical-align: middle; }
+/* Private (E2EE) mode lock — steel trust accent; shape + label, never color alone */
+.sb-lock-private { color: var(--sb-info); flex-shrink: 0; vertical-align: middle; }
 .sb-convo__name { display: inline-flex; align-items: center; gap: 4px; }
 .sb-convo__pin { color: var(--sb-text-tertiary); }
 

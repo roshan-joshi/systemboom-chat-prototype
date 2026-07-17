@@ -18,6 +18,7 @@ import type {
   Order,
   OrderItem,
   OrderStatus,
+  PrivacyMode,
   Product,
   Review,
   User,
@@ -258,9 +259,24 @@ interface StoreApi {
   createGroup: (
     name: string,
     memberIds: ID[],
-    opts?: { groupType?: Conversation['groupType']; env?: 'registered' | 'anonymous' },
+    opts?: {
+      groupType?: Conversation['groupType']
+      env?: 'registered' | 'anonymous'
+      privacyMode?: PrivacyMode
+    },
   ) => ID
-  openOrCreatePrivate: (userId: ID) => ID
+  /**
+   * Open (or create) the registered direct conversation with a user in the given
+   * privacy mode (PD-057/PD-064: one conversation per pair per mode). Defaults to
+   * Standard (PD-065) so existing callers (commerce) stay Standard.
+   */
+  openOrCreatePrivate: (userId: ID, mode?: PrivacyMode) => ID
+  /**
+   * "Continue privately" (PD-063/064): open the Private conversation with this
+   * user, creating it (with a calm system note) if it doesn't exist yet.
+   * Never converts or touches the Standard conversation (PD-058).
+   */
+  continuePrivately: (userId: ID) => ID
   readAllNotifications: () => void
   readNotification: (id: ID) => void
   // Anonymous environment
@@ -370,14 +386,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       markRead: (conversationId) => dispatch({ type: 'mark_read', conversationId }),
       createGroup: (name, memberIds, opts) => {
         const env = opts?.env ?? 'registered'
+        const mode: PrivacyMode = opts?.privacyMode ?? 'standard'
         const id = `${env === 'anonymous' ? 'ac' : 'c'}_${Date.now()}`
         const conversation: Conversation = {
           id,
           kind: 'group',
           env,
+          privacyMode: env === 'registered' ? mode : undefined,
           title: name,
           groupType: opts?.groupType ?? 'standard',
-          encrypted: true,
+          encrypted: env === 'anonymous' || mode === 'private',
           unread: 0,
           participants: [
             { userId: ME, role: 'owner' },
@@ -398,9 +416,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'add_message', message: sys })
         return id
       },
-      openOrCreatePrivate: (userId) => {
+      openOrCreatePrivate: (userId, mode = 'standard') => {
         const existing = state.conversations.find(
-          (c) => c.kind === 'private' && c.userId === userId,
+          (c) =>
+            c.kind === 'private' &&
+            (c.env ?? 'registered') === 'registered' &&
+            c.userId === userId &&
+            (c.privacyMode ?? 'standard') === mode,
         )
         if (existing) {
           if (existing.archived) dispatch({ type: 'patch_conversation', id: existing.id, patch: { archived: false } })
@@ -409,7 +431,44 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const id = `c_${Date.now()}`
         dispatch({
           type: 'add_conversation',
-          conversation: { id, kind: 'private', userId, messageIds: [], unread: 0, encrypted: true },
+          conversation: {
+            id,
+            kind: 'private',
+            userId,
+            privacyMode: mode,
+            messageIds: [],
+            unread: 0,
+            encrypted: mode === 'private',
+          },
+        })
+        return id
+      },
+
+      continuePrivately: (userId) => {
+        const existing = state.conversations.find(
+          (c) =>
+            c.kind === 'private' &&
+            (c.env ?? 'registered') === 'registered' &&
+            c.userId === userId &&
+            c.privacyMode === 'private',
+        )
+        if (existing) return existing.id
+        const id = `c_${Date.now()}`
+        dispatch({
+          type: 'add_conversation',
+          conversation: { id, kind: 'private', userId, privacyMode: 'private', messageIds: [], unread: 0, encrypted: true },
+        })
+        dispatch({
+          type: 'add_message',
+          message: {
+            id: `m${++idRef.current}`,
+            conversationId: id,
+            authorId: ME,
+            type: 'system',
+            text: 'You continued this conversation privately. Messages here are end-to-end encrypted.',
+            status: 'read',
+            createdAt: Date.now(),
+          },
         })
         return id
       },
@@ -643,6 +702,21 @@ export function latestMessage(
     if (m && (!latest || m.createdAt > latest.createdAt)) latest = m
   }
   return latest
+}
+
+/**
+ * Is this conversation end-to-end encrypted? True for Anonymous (always, PD-060)
+ * and for registered Private mode (PD-057/059). Standard is NOT E2EE.
+ */
+export function isE2EE(conv?: Conversation): boolean {
+  if (!conv) return false
+  if (conv.env === 'anonymous') return true
+  return conv.privacyMode === 'private'
+}
+
+/** Registered Private (E2EE) mode — drives lock indicators (not anonymous). */
+export function isPrivateMode(conv?: Conversation): boolean {
+  return (conv?.env ?? 'registered') === 'registered' && conv?.privacyMode === 'private'
 }
 
 /** Display title + subtitle for a conversation (private → user, group → title). */

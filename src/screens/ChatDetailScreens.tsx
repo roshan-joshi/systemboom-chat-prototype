@@ -11,6 +11,7 @@ import {
   Link2,
   Pin,
   PinOff,
+  Lock,
   Ban,
   Flag,
   LogOut,
@@ -94,11 +95,50 @@ export function ChatInfoScreen() {
             </div>
           </div>
 
-          {conv.encrypted && (
+          {/* Honest, mode-specific security info (PD-057/059) */}
+          {conv.privacyMode === 'private' ? (
+            <Banner tone="info" icon={Lock}>
+              <strong>Private conversation.</strong> End-to-end encrypted — messages, calls and media can only be read on participants’ devices.
+            </Banner>
+          ) : (
             <Banner tone="info" icon={ShieldCheck}>
-              End-to-end encrypted. Messages, calls and media stay between members.
+              <strong>Standard conversation.</strong> Secured in transit and at rest.
             </Banner>
           )}
+
+          {/* Privacy mode row — fixed at creation (PD-058) */}
+          <div className="sb-settings-group">
+            <div className="sb-settings-row">
+              <span className="sb-settings-row__icon" style={conv.privacyMode === 'private' ? { background: 'var(--sb-info-soft)', color: 'var(--sb-info)' } : undefined}>
+                <Icon as={conv.privacyMode === 'private' ? Lock : ShieldCheck} size="sm" />
+              </span>
+              <span className="sb-settings-row__body">
+                <span className="sb-settings-row__title">Privacy</span>
+                <span className="sb-settings-row__sub">
+                  {conv.privacyMode === 'private' ? 'Private (end-to-end encrypted)' : 'Standard'} · permanent for this conversation
+                </span>
+              </span>
+            </div>
+            {conv.privacyMode !== 'private' && conv.kind === 'private' && conv.userId && (
+              <button
+                className="sb-settings-row sb-settings-row--btn"
+                onClick={() => {
+                  const pid = store.continuePrivately(conv.userId!)
+                  toast.show('Continuing in your private conversation')
+                  navigate(`/chats/${pid}`)
+                }}
+              >
+                <span className="sb-settings-row__icon" style={{ background: 'var(--sb-info-soft)', color: 'var(--sb-info)' }}>
+                  <Icon as={Lock} size="sm" />
+                </span>
+                <span className="sb-settings-row__body">
+                  <span className="sb-settings-row__title">Continue privately</span>
+                  <span className="sb-settings-row__sub">Open a separate end-to-end encrypted conversation with {title}</span>
+                </span>
+                <Icon as={ChevronRight} size="sm" />
+              </button>
+            )}
+          </div>
 
           {other?.about && (
             <div className="sb-settings-group">

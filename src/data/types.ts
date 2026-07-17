@@ -174,11 +174,24 @@ export interface Participant {
 
 export type GroupType = 'standard' | 'family' | 'business'
 
+/**
+ * Registered conversation privacy mode (PD-057). Chosen contact-first before the
+ * first message; permanent once the conversation is created (PD-058, PD-063).
+ * Anonymous conversations have no mode — they are always E2EE (PD-060).
+ */
+export type PrivacyMode = 'standard' | 'private'
+
 export interface Conversation {
   id: ID
   kind: 'private' | 'group'
   /** Which communication environment this conversation belongs to (PD-033). */
   env?: 'registered' | 'anonymous'
+  /**
+   * Privacy mode for registered conversations (PD-057/PD-058). A pair of users
+   * may hold one conversation per mode (PD-064). Undefined ⇒ 'standard'.
+   * Note: `kind: 'private'` means one-to-one (Direct); the E2EE mode lives here.
+   */
+  privacyMode?: PrivacyMode
   messageIds: ID[]
   unread: number
   pinned?: boolean

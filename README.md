@@ -50,6 +50,7 @@ src/
 | 3 | Anonymous communication — identity, QR pairing, anonymous chats/groups, identity switching & manager | ✅ Complete |
 | 4 | Conversation commerce — marketplace, product, offers, orders, payment, tracking, reviews | ✅ Complete |
 | 5 | Polish — loading skeletons, offline + error recovery, empty states, motion, accessibility | ✅ Complete |
+| 5.1B | Privacy model alignment — Standard/Private modes (PD-057–PD-067), contact-first creation, dual threads, Continue privately, anonymous E2EE calls, honest security copy | ✅ Complete |
 
 ### Phase 2 highlights
 
@@ -70,3 +71,19 @@ Recorded for later review — small UX decisions not fully specified by the docs
 3. **Desktop expansion** uses a left nav rail; mobile/tablet use bottom navigation. Docs specify
    mobile-first with desktop as an extension, not the exact desktop chrome.
 4. **Level-1 destinations** shown as premium empty states until their delivery phase.
+
+### Prototype Assumptions (Phase 5.1B — privacy model)
+
+5. **Seller/commerce conversations default to Standard** (server-assisted commerce);
+   PS-003 does not define a mode. "Continue privately" remains available, but commerce
+   records are never moved into Private threads.
+6. **Anonymous call history is isolated**: anonymous calls are not recorded in the
+   registered Call History (SC-063) and no anonymous call-history UI exists yet —
+   the documentation does not define one (PD-033 isolation applied).
+7. **"Continue privately" is direct-chat only** in this phase; group escalation is
+   not defined in the documentation and was not invented.
+8. **Multi-device readiness (PD-067):** `privacyMode` is an explicit, extensible
+   conversation property; no UI copy promises device sync for Private chats, and
+   nothing in the model precludes adding authorized-device key sharing later.
+9. **No real cryptography** — privacy modes are a UX prototype; no production
+   encryption is implemented or claimed.

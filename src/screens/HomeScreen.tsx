@@ -21,7 +21,7 @@ interface Tile {
 }
 
 const TILES: Tile[] = [
-  { title: 'Chats', sub: 'Private & group', icon: MessageSquare, to: '/chats', color: 'var(--sb-primary)', bg: 'var(--sb-primary-soft)' },
+  { title: 'Chats', sub: 'Direct & group', icon: MessageSquare, to: '/chats', color: 'var(--sb-primary)', bg: 'var(--sb-primary-soft)' },
   { title: 'Calls', sub: 'Voice & video', icon: Phone, to: '/calls', color: 'var(--sb-secondary)', bg: 'var(--sb-secondary-soft)' },
   { title: 'Marketplace', sub: 'Shop in chat', icon: Store, to: '/marketplace', color: 'var(--sb-warning)', bg: 'var(--sb-warning-soft)' },
   { title: 'Anonymous', sub: 'Private mode', icon: VenetianMask, to: '/anon', color: 'var(--sb-anon)', bg: 'var(--sb-anon-soft)' },

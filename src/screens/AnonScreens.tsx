@@ -96,7 +96,7 @@ function AnonOnboarding({ onDone }: { onDone: () => void }) {
 
   const POINTS: { icon: LucideIcon; title: string; text: string }[] = [
     { icon: EyeOff, title: 'No real identity', text: 'A temporary, device-generated identity — no name, email or phone.' },
-    { icon: Lock, title: 'End-to-end encrypted', text: 'Only you and the other device can read messages. Servers never can.' },
+    { icon: Lock, title: 'Always end-to-end encrypted', text: 'Zero-knowledge protection that can’t be turned off — servers can never read your messages, media or keys.' },
     { icon: QrCode, title: 'You choose who connects', text: 'Share a QR code or public key. Nothing is discoverable without it.' },
     { icon: ShieldCheck, title: 'Still safe', text: 'Block, report and exit are always available. Anonymous is not unmoderated.' },
   ]
@@ -132,7 +132,7 @@ function AnonOnboarding({ onDone }: { onDone: () => void }) {
           </div>
 
           <Banner tone="info" icon={Info}>
-            Anonymous mode is for messaging only — commerce, calls and other modules stay in your registered account.
+            Anonymous mode covers messaging and end-to-end encrypted calls — commerce and other modules stay in your registered account.
           </Banner>
         </div>
       </div>

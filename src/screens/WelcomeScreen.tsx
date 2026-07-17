@@ -35,7 +35,7 @@ export function WelcomeScreen() {
             <span className="sb-welcome__point-icon">
               <Icon as={MessageSquare} size="sm" />
             </span>
-            Private &amp; group chat that flows into everything you need.
+            Direct &amp; group chat that flows into everything you need.
           </div>
           <div className="sb-welcome__point">
             <span className="sb-welcome__point-icon">

@@ -20,6 +20,7 @@ import { NotFoundScreen } from '@/screens/NotFoundScreen'
 import { ChatListScreen } from '@/screens/ChatListScreen'
 import { ConversationScreen } from '@/screens/ConversationScreen'
 import { NewChatScreen, CreateGroupScreen } from '@/screens/NewChatScreen'
+import { DraftChatScreen } from '@/screens/DraftChatScreen'
 import {
   ChatInfoScreen,
   SharedMediaScreen,
@@ -85,6 +86,8 @@ export const ROUTES: RouteDef[] = [
   { id: 'SC-020', pattern: '/archived', element: <ChatListScreen archived />, chrome: 'app', tab: 'chats', deep: true },
   { id: 'SC-023', pattern: '/new-chat', element: <NewChatScreen />, chrome: 'app', tab: 'chats', deep: true },
   { id: 'SC-023', pattern: '/new-group', element: <CreateGroupScreen />, chrome: 'app', tab: 'chats', deep: true },
+  // Pre-creation state of a Direct Chat (FLOW-003 / PD-063) — not a new SC screen.
+  { id: 'SC-023', pattern: '/draft-chat/:userId', element: <DraftChatScreen />, chrome: 'app', tab: 'chats', deep: true },
   { id: 'SC-021', pattern: '/chats/:id', element: <ConversationScreen />, chrome: 'app', tab: 'chats', deep: true },
   { id: 'SC-025', pattern: '/chats/:id/info', element: <ChatInfoScreen />, chrome: 'app', tab: 'chats', deep: true },
   { id: 'SC-026', pattern: '/chats/:id/media', element: <SharedMediaScreen />, chrome: 'app', tab: 'chats', deep: true },

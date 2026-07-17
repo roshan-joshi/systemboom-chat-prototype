@@ -136,24 +136,38 @@ export const MESSAGES: Message[] = [
 
 const ids = (msgs: Message[]) => msgs.map((m) => m.id)
 
+/* Received Private conversation (PD-066): Sita started a separate E2EE thread.
+   Coexists with the Standard thread c_sita (PD-064) — separate history. */
+const T_SITA_PRIVATE = build('cp_sita', [
+  { authorId: 'u_sita', type: 'system', text: 'Sita started a private conversation — end-to-end encrypted', at: ago(80 * MIN) },
+  { authorId: 'u_sita', type: 'text', text: 'Moving the contract details here 🔒', at: ago(78 * MIN) },
+  { authorId: 'u_sita', type: 'document', document: { name: 'Contract-draft.pdf', size: '640 KB', ext: 'PDF' }, at: ago(77 * MIN) },
+  { authorId: ME, type: 'text', text: 'Got it — much better to keep this here.', at: ago(70 * MIN) },
+  { authorId: 'u_sita', type: 'text', text: 'Exactly. Ping me once you’ve read section 4.', at: ago(8 * MIN) },
+])
+MESSAGES.push(...T_SITA_PRIVATE)
+
+/* Privacy modes per PD-057/PD-064/PD-065: Standard is the default; `encrypted`
+   is true only where E2EE truly applies (Private mode + all Anonymous). */
 export const CONVERSATIONS: Conversation[] = [
-  { id: 'c_sita', kind: 'private', userId: 'u_sita', messageIds: ids(T_SITA), unread: 2, pinned: true, encrypted: true },
-  { id: 'c_design', kind: 'group', title: 'Design Team', groupType: 'standard', encrypted: true, participants: [
+  { id: 'c_sita', kind: 'private', privacyMode: 'standard', userId: 'u_sita', messageIds: ids(T_SITA), unread: 2, pinned: true },
+  { id: 'cp_sita', kind: 'private', privacyMode: 'private', userId: 'u_sita', messageIds: ids(T_SITA_PRIVATE), unread: 1, encrypted: true },
+  { id: 'c_design', kind: 'group', privacyMode: 'standard', title: 'Design Team', groupType: 'standard', participants: [
       { userId: 'u_sita', role: 'owner' }, { userId: ME, role: 'admin' }, { userId: 'u_deepa', role: 'member' },
       { userId: 'u_rojan', role: 'member' }, { userId: 'u_bibek', role: 'member' },
     ], messageIds: ids(T_DESIGN), unread: 5 },
-  { id: 'c_boom', kind: 'private', userId: 'u_boom', messageIds: ids(T_BOOM), unread: 1, encrypted: true },
-  { id: 'c_bibek', kind: 'private', userId: 'u_bibek', messageIds: ids(T_BIBEK), unread: 1, encrypted: true },
-  { id: 'c_family', kind: 'group', title: 'Family', groupType: 'family', encrypted: true, participants: [
+  { id: 'c_boom', kind: 'private', privacyMode: 'standard', userId: 'u_boom', messageIds: ids(T_BOOM), unread: 1 },
+  { id: 'c_bibek', kind: 'private', privacyMode: 'standard', userId: 'u_bibek', messageIds: ids(T_BIBEK), unread: 1 },
+  { id: 'c_family', kind: 'group', privacyMode: 'private', title: 'Family', groupType: 'family', encrypted: true, participants: [
       { userId: 'u_mom', role: 'owner' }, { userId: 'u_dai', role: 'member' }, { userId: ME, role: 'member' },
     ], messageIds: ids(T_FAMILY), unread: 0 },
-  { id: 'c_anita', kind: 'private', userId: 'u_anita', messageIds: ids(T_ANITA), unread: 0, encrypted: true },
-  { id: 'c_announce', kind: 'group', title: 'Boom Sellers', groupType: 'business', announcementMode: true, encrypted: true, participants: [
+  { id: 'c_anita', kind: 'private', privacyMode: 'standard', userId: 'u_anita', messageIds: ids(T_ANITA), unread: 0 },
+  { id: 'c_announce', kind: 'group', privacyMode: 'standard', title: 'Boom Sellers', groupType: 'business', announcementMode: true, participants: [
       { userId: 'u_boom', role: 'owner' }, { userId: ME, role: 'member' }, { userId: 'u_sita', role: 'member' }, { userId: 'u_rojan', role: 'member' },
     ], messageIds: ids(T_ANNOUNCE), unread: 0, muted: true },
-  { id: 'c_prakash', kind: 'private', userId: 'u_prakash', messageIds: ids(T_PRAKASH), unread: 0, encrypted: true },
-  { id: 'c_maya', kind: 'private', userId: 'u_maya', messageIds: ids(T_MAYA), unread: 0, muted: true, encrypted: true },
-  { id: 'c_arjun', kind: 'private', userId: 'u_arjun', messageIds: ids(T_ARJUN), unread: 0, archived: true, encrypted: true },
+  { id: 'c_prakash', kind: 'private', privacyMode: 'standard', userId: 'u_prakash', messageIds: ids(T_PRAKASH), unread: 0 },
+  { id: 'c_maya', kind: 'private', privacyMode: 'standard', userId: 'u_maya', messageIds: ids(T_MAYA), unread: 0, muted: true },
+  { id: 'c_arjun', kind: 'private', privacyMode: 'standard', userId: 'u_arjun', messageIds: ids(T_ARJUN), unread: 0, archived: true },
 ]
 
 export const CALLS: CallRecord[] = [

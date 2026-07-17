@@ -21,7 +21,7 @@ import {
   Megaphone,
 } from 'lucide-react'
 import { useRouter } from '@/lib/router'
-import { VenetianMask, KeyRound, LogOut, Ban, Flag } from 'lucide-react'
+import { VenetianMask, KeyRound, LogOut, Ban, Flag, Lock } from 'lucide-react'
 import {
   TopAppBar,
   IconButton,
@@ -55,6 +55,8 @@ export function ConversationScreen() {
   const store = useStore()
   const conv = useConversation(id)
   const isAnon = conv?.env === 'anonymous'
+  // Registered Private (E2EE) mode — PD-057; Standard is the silent default.
+  const isPriv = !isAnon && conv?.privacyMode === 'private'
   const chatsBase = isAnon ? '/anon/chats' : '/chats'
   const messages = useMessages(id)
   const other = useUser(conv?.kind === 'private' ? conv.userId : undefined)
@@ -203,7 +205,12 @@ export function ConversationScreen() {
               presence={!isAnon && conv.kind === 'private' ? other?.presence : undefined}
             />
             <span className="sb-chathead__body">
-              <span className="sb-chathead__name">{title}</span>
+              <span className="sb-chathead__name">
+                {title}
+                {isPriv && (
+                  <Icon as={Lock} size={14} className="sb-lock-private" label="Private — end-to-end encrypted" />
+                )}
+              </span>
               <span className={statusLine === 'online' ? 'sb-chathead__status sb-chathead__status--online' : 'sb-chathead__status'}>
                 {isAnon && <Icon as={VenetianMask} size={12} />}
                 {conv.announcementMode && <Icon as={Megaphone} size={12} />}
@@ -215,23 +222,22 @@ export function ConversationScreen() {
         onBack={back}
         actions={
           <>
-            {!isAnon && (
-              <>
-                <IconButton icon={Video} label="Video call" onClick={() => navigate(`/call/${id}?kind=video`)} />
-                <IconButton icon={Phone} label="Voice call" onClick={() => navigate(`/call/${id}?kind=voice`)} />
-              </>
-            )}
+            {/* Calls are V1 in BOTH environments (PD-061); anonymous calls are E2EE. */}
+            <IconButton icon={Video} label="Video call" onClick={() => navigate(`/call/${id}?kind=video`)} />
+            <IconButton icon={Phone} label="Voice call" onClick={() => navigate(`/call/${id}?kind=voice`)} />
             <IconButton icon={MoreVertical} label="More" onClick={() => setHeaderMenu(true)} />
           </>
         }
       />
 
-      {conv.encrypted && messages.length > 0 && (
+      {/* Honest privacy banners: silent for Standard (PD-059/065); E2EE claims
+          only where E2EE truly applies (Private + Anonymous). */}
+      {(isAnon || isPriv) && messages.length > 0 && (
         <div style={{ padding: '8px var(--sb-space-3) 0' }}>
-          <Banner tone={isAnon ? 'anon' : 'info'} icon={isAnon ? VenetianMask : ShieldCheck}>
+          <Banner tone={isAnon ? 'anon' : 'info'} icon={isAnon ? VenetianMask : Lock}>
             {isAnon
-              ? 'You are chatting anonymously. Identities are hidden and messages are end-to-end encrypted.'
-              : 'Messages are end-to-end encrypted. No one outside this chat can read them.'}
+              ? 'You are chatting anonymously. Always end-to-end encrypted — servers can never read your messages.'
+              : 'Private conversation — end-to-end encrypted. Only participants’ devices can read it.'}
           </Banner>
         </div>
       )}
@@ -262,7 +268,7 @@ export function ConversationScreen() {
         onCancelReply={() => setReplyTo(null)}
         locked={announceLocked}
         lockedLabel="Only admins can post in Announcement Mode"
-        placeholder={editing ? 'Edit message' : 'Message'}
+        placeholder={editing ? 'Edit message' : isPriv ? 'Private message' : 'Message'}
       />
 
       {/* Attachments */}
@@ -391,6 +397,19 @@ export function ConversationScreen() {
               ]
             : [
                 { label: 'View info', icon: Info, onSelect: () => navigate(`/chats/${id}/info`) },
+                // Escalation verb (PD-063/064): opens the separate Private thread;
+                // never converts this Standard conversation (PD-058).
+                ...(!isPriv && conv.kind === 'private' && conv.userId
+                  ? [{
+                      label: 'Continue privately',
+                      icon: Lock,
+                      onSelect: () => {
+                        const pid = store.continuePrivately(conv.userId!)
+                        toast.show('Continuing in your private conversation')
+                        navigate(`/chats/${pid}`)
+                      },
+                    }]
+                  : []),
                 { label: 'Search in chat', icon: Search, onSelect: () => navigate(`/chats/${id}/search`) },
                 { label: conv.muted ? 'Unmute' : 'Mute', icon: MoreVertical, onSelect: () => { store.toggleMute(id!); toast.show(conv.muted ? 'Unmuted' : 'Muted') } },
               ]

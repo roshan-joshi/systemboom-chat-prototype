@@ -25,6 +25,7 @@ import {
   Camera,
   Smile,
   X,
+  Lock,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { cx } from '@/lib/utils'
@@ -71,6 +72,7 @@ export function ConversationListItem({
   avatarSrc,
   kind,
   anonAvatar,
+  privateMode,
   presence,
   preview,
   time,
@@ -88,6 +90,8 @@ export function ConversationListItem({
   avatarSrc?: string
   kind: 'private' | 'group' | 'business'
   anonAvatar?: boolean
+  /** Registered Private (E2EE) mode — shows the restrained lock (PD-057/063). */
+  privateMode?: boolean
   presence?: 'online' | 'away' | 'offline'
   preview: ReactNode
   time: number
@@ -137,6 +141,14 @@ export function ConversationListItem({
         <span className="sb-convo__top">
           <span className="sb-convo__name">
             {title}
+            {privateMode && (
+              <Icon
+                as={Lock}
+                size={13}
+                className="sb-lock-private"
+                label="Private conversation — end-to-end encrypted"
+              />
+            )}
             {verified && (
               <Icon as={BadgeCheck} size={14} className="sb-inline-verified" label="Verified" />
             )}

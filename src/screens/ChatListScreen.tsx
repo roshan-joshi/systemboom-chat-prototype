@@ -169,6 +169,7 @@ export function ChatListScreen({ archived = false }: { archived?: boolean }) {
                 title={conversationTitle(c, users)}
                 avatarName={conversationTitle(c, users)}
                 kind={c.kind === 'group' ? (c.groupType === 'business' ? 'business' : 'group') : 'private'}
+                privateMode={c.privacyMode === 'private'}
                 presence={c.kind === 'private' ? user?.presence : undefined}
                 verified={c.kind === 'private' ? user?.verified : c.groupType === 'business'}
                 preview={rowPreview(c)}

@@ -90,6 +90,15 @@ export function CallScreen() {
   const conv = useConversation(id)
   const other = useUser(conv?.kind === 'private' ? conv.userId : undefined)
   const toast = useToast()
+  // Call security follows the conversation (PD-057/059/061):
+  // Standard → secure transport · Private → E2EE · Anonymous → E2EE + zero-knowledge.
+  const isAnonConv = conv?.env === 'anonymous'
+  const isPrivConv = !isAnonConv && conv?.privacyMode === 'private'
+  const securityCaption = isAnonConv
+    ? 'End-to-end encrypted · zero-knowledge'
+    : isPrivConv
+      ? 'End-to-end encrypted'
+      : 'Secure call'
 
   const [phase, setPhase] = useState<'ringing' | 'connected'>('ringing')
   const [seconds, setSeconds] = useState(0)
@@ -110,13 +119,15 @@ export function CallScreen() {
 
   const clock = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
   const endCall = () => {
-    if (id) navigate(`/chats/${id}`, { replace: true })
+    // Return to the correct conversation AND environment (FLOW-006/007, PD-033).
+    if (id) navigate(`${isAnonConv ? '/anon/chats' : '/chats'}/${id}`, { replace: true })
     else back()
   }
 
   return (
     <div
       className="sb-fill"
+      data-anon={isAnonConv ? 'true' : undefined}
       style={{
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -135,7 +146,11 @@ export function CallScreen() {
 
       <div style={{ marginTop: 'var(--sb-space-8)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
         <div style={phase === 'ringing' ? { animation: 'sb-pulse-ring 1.6s infinite', borderRadius: '50%' } : undefined}>
-          <Avatar name={title ?? '?'} kind={conv?.kind === 'group' ? 'group' : 'user'} size={128} />
+          <Avatar
+            name={title ?? '?'}
+            kind={conv?.kind === 'group' ? 'group' : isAnonConv ? 'anonymous' : 'user'}
+            size={128}
+          />
         </div>
         <div>
           <h1 style={{ fontSize: 'var(--sb-text-heading)', fontWeight: 700 }}>{title}</h1>
@@ -143,7 +158,7 @@ export function CallScreen() {
             {phase === 'ringing' ? `${kind === 'video' ? 'Video' : 'Voice'} call · Ringing…` : clock}
           </p>
           <p style={{ opacity: 0.6, fontSize: 'var(--sb-text-caption)', marginTop: 8, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
-            <Icon as={Info} size={13} /> End-to-end encrypted
+            <Icon as={Info} size={13} /> {securityCaption}
           </p>
         </div>
       </div>
