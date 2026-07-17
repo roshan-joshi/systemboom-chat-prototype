@@ -1,5 +1,7 @@
 # SystemBoom Chat — Interactive Prototype
 
+> 🧊 **v1.0.0-prototype — FROZEN baseline** (2026-07-17, commit `cfb4ef1`, tag `v1.0.0-prototype`). See [RELEASE.md](RELEASE.md). No feature work without a new approved phase.
+
 A production-quality, interactive UX prototype of the SystemBoom Chat product.
 This is **the product experience**, not a developer demo — suitable for investors,
 partners, UX testing, product reviews, and as the frontend blueprint.
