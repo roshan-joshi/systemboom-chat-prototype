@@ -68,17 +68,22 @@ export function useFocusTrap<T extends HTMLElement>(active = true) {
     const container = ref.current
     const previouslyFocused = document.activeElement as HTMLElement | null
 
+    const FOCUSABLE_SEL =
+      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+    const queryFocusable = () =>
+      Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SEL))
+    // Visible-only set, used by the Tab-cycling logic.
     const getFocusable = () =>
-      Array.from(
-        container.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter((el) => el.offsetParent !== null || el === document.activeElement)
+      queryFocusable().filter((el) => el.offsetParent !== null || el === document.activeElement)
 
-    // Focus the first sensible element.
-    const focusables = getFocusable()
-    const first = focusables[0]
-    if (first) requestAnimationFrame(() => first.focus())
+    // Move initial focus into the trap synchronously. This effect runs after the
+    // portal has painted, so the container has layout; use the UNFILTERED set so
+    // a dialog whose buttons momentarily report offsetParent === null still
+    // receives focus (part of the M2 fix). Running synchronously — rather than on
+    // requestAnimationFrame, which is throttled while the tab is backgrounded —
+    // guarantees focus lands inside the dialog and beats any restore from an
+    // overlay closing in the same commit (setups run after cleanups).
+    queryFocusable()[0]?.focus()
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return
@@ -97,7 +102,16 @@ export function useFocusTrap<T extends HTMLElement>(active = true) {
     container.addEventListener('keydown', onKey)
     return () => {
       container.removeEventListener('keydown', onKey)
-      previouslyFocused?.focus?.()
+      // Restore focus to the trigger — but never yank it away from an overlay
+      // that opened as this one closed (e.g. Conversation Actions → Delete
+      // confirmation). Only restore if focus is still ours or has fallen back to
+      // <body>; if another dialog has already taken focus, leave it there. This
+      // runs before the newly-opened trap's setup focuses its own content, so the
+      // dialog still wins the M2 race. (fixes the M2 focus-containment defect).
+      const active = document.activeElement
+      if (!active || active === document.body || container.contains(active)) {
+        previouslyFocused?.focus?.()
+      }
     }
   }, [active])
   return ref
