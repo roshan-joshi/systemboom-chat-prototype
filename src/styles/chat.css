@@ -3,6 +3,43 @@
   Conversation is the hero: bubbles are calm, chrome is quiet.
 */
 
+/* ---------------- Swipe quick actions (FLOW-023 · PD-071) ----------------
+   Additive mobile shortcut: the foreground row slides left to reveal Archive
+   and Delete. Buttons sit underneath and are occluded until the row slides. */
+.sb-swipe {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--sb-radius-md);
+}
+.sb-swipe__actions {
+  position: absolute;
+  inset: 0 0 0 auto;
+  display: flex;
+  align-items: stretch;
+}
+.sb-swipe__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 78px;
+  border: none;
+  color: #fff;
+  font-size: var(--sb-text-caption);
+  font-weight: 600;
+  background: var(--sb-secondary);
+  cursor: pointer;
+}
+.sb-swipe__btn--danger { background: var(--sb-error); }
+.sb-swipe__btn-label { line-height: 1; }
+.sb-swipe__fg {
+  position: relative;
+  background: var(--sb-bg);
+  will-change: transform;
+  touch-action: pan-y; /* let vertical scroll through; we own horizontal */
+}
+
 /* ---------------- Conversation list item ---------------- */
 .sb-convo {
   display: flex;

@@ -22,6 +22,7 @@ import {
   Segmented,
   Fab,
   ConversationListItem,
+  SwipeRow,
   ActionSheet,
   ConfirmDialog,
   EmptyState,
@@ -54,6 +55,7 @@ export function ChatListScreen({ archived = false }: { archived?: boolean }) {
   const [query, setQuery] = useState('')
   const [menuFor, setMenuFor] = useState<Conversation | null>(null)
   const [deleteFor, setDeleteFor] = useState<Conversation | null>(null)
+  const [swipeOpenId, setSwipeOpenId] = useState<string | null>(null)
   const [topMenu, setTopMenu] = useState(false)
 
   const users = state.users
@@ -168,26 +170,42 @@ export function ChatListScreen({ archived = false }: { archived?: boolean }) {
             const last = lastOf(c)
             const user = c.userId ? users[c.userId] : undefined
             return (
-              <ConversationListItem
+              // FLOW-023 (PD-071): swipe-left reveals Archive + Delete. Archive is
+              // immediate; Delete reuses the confirmation dialog below. Long-press
+              // (onContext) and every other entry point are unchanged.
+              <SwipeRow
                 key={c.id}
-                title={conversationTitle(c, users)}
-                avatarName={conversationTitle(c, users)}
-                kind={c.kind === 'group' ? (c.groupType === 'business' ? 'business' : 'group') : 'private'}
-                privateMode={c.privacyMode === 'private'}
-                presence={c.kind === 'private' ? user?.presence : undefined}
-                verified={c.kind === 'private' ? user?.verified : c.groupType === 'business'}
-                preview={rowPreview(c)}
-                time={last?.createdAt ?? 0}
-                unread={c.unread}
-                pinned={c.pinned}
-                muted={c.muted}
-                status={last && last.authorId === store.me ? last.status : undefined}
-                onClick={() => {
-                  store.markRead(c.id)
-                  navigate(`/chats/${c.id}`)
-                }}
-                onContext={() => setMenuFor(c)}
-              />
+                open={swipeOpenId === c.id}
+                onOpenChange={(o) => setSwipeOpenId(o ? c.id : null)}
+                actions={[
+                  {
+                    label: c.archived ? 'Unarchive' : 'Archive',
+                    icon: c.archived ? ArchiveRestore : Archive,
+                    onSelect: () => { store.toggleArchive(c.id); toast.show(c.archived ? 'Unarchived' : 'Archived') },
+                  },
+                  { label: 'Delete', icon: Trash2, tone: 'danger', onSelect: () => setDeleteFor(c) },
+                ]}
+              >
+                <ConversationListItem
+                  title={conversationTitle(c, users)}
+                  avatarName={conversationTitle(c, users)}
+                  kind={c.kind === 'group' ? (c.groupType === 'business' ? 'business' : 'group') : 'private'}
+                  privateMode={c.privacyMode === 'private'}
+                  presence={c.kind === 'private' ? user?.presence : undefined}
+                  verified={c.kind === 'private' ? user?.verified : c.groupType === 'business'}
+                  preview={rowPreview(c)}
+                  time={last?.createdAt ?? 0}
+                  unread={c.unread}
+                  pinned={c.pinned}
+                  muted={c.muted}
+                  status={last && last.authorId === store.me ? last.status : undefined}
+                  onClick={() => {
+                    store.markRead(c.id)
+                    navigate(`/chats/${c.id}`)
+                  }}
+                  onContext={() => setMenuFor(c)}
+                />
+              </SwipeRow>
             )
           })
         )}

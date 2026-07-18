@@ -179,6 +179,118 @@ export function ConversationListItem({
   )
 }
 
+/* ---------------- Swipe quick actions (SC-020 / FLOW-023 · PD-071) ----------------
+   Mobile-only enhancement: swipe-LEFT on a conversation row reveals Archive and
+   Delete quick actions. Swipe-right is reserved (no behaviour). Delete never
+   deletes immediately — it defers to the caller's confirmation dialog. This is
+   additive: Long Press, Chat Information and desktop right-click are untouched,
+   and the reveal buttons stay out of the tab order when hidden, so accessibility
+   never depends on the gesture. */
+export interface SwipeAction {
+  label: string
+  icon: LucideIcon
+  tone?: 'default' | 'danger'
+  onSelect: () => void
+}
+
+export function SwipeRow({
+  actions,
+  open,
+  onOpenChange,
+  children,
+}: {
+  actions: SwipeAction[]
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  children: ReactNode
+}) {
+  const REVEAL = 78 * actions.length // px revealed when fully open (one button each)
+  const [dx, setDx] = useState(0) // live drag offset while the finger is down
+  const drag = useRef<{ x: number; y: number; active: boolean; decided: boolean } | null>(null)
+
+  const offset = drag.current?.active ? dx : open ? -REVEAL : 0
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    // Touch-only: mouse/desktop behaviour is intentionally unchanged (PD-071).
+    if (e.pointerType !== 'touch') return
+    drag.current = { x: e.clientX, y: e.clientY, active: false, decided: false }
+  }
+  const onPointerMove = (e: React.PointerEvent) => {
+    const d = drag.current
+    if (!d) return
+    const mx = e.clientX - d.x
+    const my = e.clientY - d.y
+    if (!d.decided) {
+      // Only claim the gesture once it is clearly horizontal — leave vertical
+      // scrolling alone.
+      if (Math.abs(mx) < 8 && Math.abs(my) < 8) return
+      d.decided = true
+      d.active = Math.abs(mx) > Math.abs(my)
+      if (!d.active) drag.current = null
+      return
+    }
+    // Swipe-right is reserved: clamp so the row never opens to the right.
+    const base = open ? -REVEAL : 0
+    const next = Math.min(0, Math.max(-REVEAL - 12, base + mx))
+    setDx(next)
+  }
+  const endDrag = () => {
+    const d = drag.current
+    if (d?.active) {
+      // Snap open past ~40% of the reveal; otherwise snap closed. No full-swipe
+      // action ever fires (Delete always goes through confirmation).
+      onOpenChange(offset < -REVEAL * 0.4)
+    }
+    drag.current = null
+    setDx(0)
+  }
+
+  return (
+    <div className={cx('sb-swipe', open && 'sb-swipe--open')}>
+      <div className="sb-swipe__actions" aria-hidden={!open}>
+        {actions.map((a) => (
+          <button
+            key={a.label}
+            type="button"
+            className={cx('sb-swipe__btn', a.tone === 'danger' && 'sb-swipe__btn--danger')}
+            tabIndex={open ? 0 : -1}
+            aria-label={a.label}
+            onClick={() => {
+              onOpenChange(false)
+              a.onSelect()
+            }}
+          >
+            <Icon as={a.icon} size="sm" />
+            <span className="sb-swipe__btn-label">{a.label}</span>
+          </button>
+        ))}
+      </div>
+      <div
+        className="sb-swipe__fg"
+        style={{
+          transform: `translateX(${offset}px)`,
+          transition: drag.current?.active ? 'none' : 'transform var(--sb-duration-fast) var(--sb-ease-standard)',
+        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        // While open, a tap on the row closes the reveal instead of opening the
+        // conversation — intercept in the capture phase before the inner button.
+        onClickCapture={(e) => {
+          if (open) {
+            e.preventDefault()
+            e.stopPropagation()
+            onOpenChange(false)
+          }
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
 /* ---------------- Reactions ---------------- */
 function Reactions({ message, me }: { message: Message; me: string }) {
   if (!message.reactions?.length) return null
