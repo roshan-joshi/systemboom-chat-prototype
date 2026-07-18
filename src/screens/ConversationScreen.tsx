@@ -71,6 +71,7 @@ export function ConversationScreen() {
   const [actionFor, setActionFor] = useState<Message | null>(null)
   const [headerMenu, setHeaderMenu] = useState(false)
   const [deleteFor, setDeleteFor] = useState<Message | null>(null)
+  const [deleteConvOpen, setDeleteConvOpen] = useState(false)
 
   const threadRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -413,8 +414,30 @@ export function ConversationScreen() {
                   : []),
                 { label: 'Search in chat', icon: Search, onSelect: () => navigate(`/chats/${id}/search`) },
                 { label: conv.muted ? 'Unmute' : 'Mute', icon: MoreVertical, onSelect: () => { store.toggleMute(id!); toast.show(conv.muted ? 'Unmuted' : 'Muted') } },
+                // FLOW-021 — Delete Conversation (PD-068/PD-070)
+                { label: 'Delete conversation', icon: Trash2, danger: true, onSelect: () => setDeleteConvOpen(true) },
               ]
         }
+      />
+
+      {/* Delete Conversation confirmation (current user's copy only — PD-068/PD-070) */}
+      <ConfirmDialog
+        open={deleteConvOpen}
+        onClose={() => setDeleteConvOpen(false)}
+        onConfirm={() => {
+          store.deleteConversation(id!)
+          toast.show('Conversation removed from your chat list')
+          navigate('/chats', { replace: true })
+        }}
+        icon={Trash2}
+        tone="danger"
+        title="Delete conversation?"
+        description={
+          conv.kind === 'group'
+            ? 'This removes the group conversation from your chat list only. You remain a member, the group continues, and other members are unaffected.'
+            : `This removes the conversation from your chat list only. ${title} is not affected.`
+        }
+        confirmLabel="Delete"
       />
     </div>
   )

@@ -5,6 +5,8 @@ import {
   Search,
   BellOff,
   Bell,
+  Archive,
+  ArchiveRestore,
   ShieldCheck,
   Image as ImageIcon,
   FileText,
@@ -174,6 +176,20 @@ export function ChatInfoScreen() {
               <span className="sb-settings-row__body"><span className="sb-settings-row__title">Mute notifications</span></span>
               <Switch checked={!!conv.muted} onChange={() => store.toggleMute(id!)} label="Mute" />
             </div>
+            {/* FLOW-022 — Archive (reversible, separate from Delete — PD-069) */}
+            <button
+              className="sb-settings-row sb-settings-row--btn"
+              onClick={() => {
+                store.toggleArchive(id!)
+                toast.show(conv.archived ? 'Unarchived' : 'Archived — history kept and searchable')
+              }}
+            >
+              <span className="sb-settings-row__icon"><Icon as={conv.archived ? ArchiveRestore : Archive} size="sm" /></span>
+              <span className="sb-settings-row__body">
+                <span className="sb-settings-row__title">{conv.archived ? 'Unarchive conversation' : 'Archive conversation'}</span>
+                <span className="sb-settings-row__sub">Reversible — history is kept and remains searchable</span>
+              </span>
+            </button>
           </div>
 
           {/* Group: announcement + members */}
@@ -246,6 +262,14 @@ export function ChatInfoScreen() {
                 <span className="sb-settings-row__body"><span className="sb-settings-row__title">Leave group</span></span>
               </button>
             )}
+            {/* FLOW-021 — Delete Conversation (PD-068/PD-070); separate from Leave Group */}
+            <button className="sb-settings-row sb-settings-row--btn" style={{ color: 'var(--sb-error)' }} onClick={() => setConfirm('delete')}>
+              <span className="sb-settings-row__icon" style={{ color: 'var(--sb-error)' }}><Icon as={Trash2} size="sm" /></span>
+              <span className="sb-settings-row__body">
+                <span className="sb-settings-row__title">Delete conversation</span>
+                <span className="sb-settings-row__sub">Removes it from your chat list only</span>
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -254,18 +278,26 @@ export function ChatInfoScreen() {
         open={!!confirm}
         onClose={() => setConfirm(null)}
         onConfirm={() => {
-          toast.show(confirm === 'block' ? `${other?.name} blocked` : confirm === 'leave' ? 'You left the group' : 'Chat deleted')
+          if (confirm === 'delete') {
+            // FLOW-021 (PD-068/PD-070): current user's copy only.
+            store.deleteConversation(id!)
+            toast.show('Conversation removed from your chat list')
+          } else {
+            toast.show(confirm === 'block' ? `${other?.name} blocked` : 'You left the group')
+          }
           navigate('/chats')
         }}
         icon={confirm === 'block' ? Ban : confirm === 'leave' ? LogOut : Trash2}
         tone="danger"
-        title={confirm === 'block' ? `Block ${other?.name}?` : confirm === 'leave' ? 'Leave group?' : 'Delete chat?'}
+        title={confirm === 'block' ? `Block ${other?.name}?` : confirm === 'leave' ? 'Leave group?' : 'Delete conversation?'}
         description={
           confirm === 'block'
             ? 'They won’t be able to message or call you. You can unblock anytime.'
             : confirm === 'leave'
               ? 'You’ll stop receiving messages. The group history stays with remaining members.'
-              : 'This removes the conversation from your device.'
+              : conv.kind === 'group'
+                ? 'This removes the group conversation from your chat list only. You remain a member, the group continues, and other members are unaffected.'
+                : `This removes the conversation from your chat list only. ${title} is not affected.`
         }
         confirmLabel={confirm === 'block' ? 'Block' : confirm === 'leave' ? 'Leave' : 'Delete'}
       />

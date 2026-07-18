@@ -90,6 +90,7 @@ type Action =
   | { type: 'react'; id: ID; emoji: string; userId: ID }
   | { type: 'patch_conversation'; id: ID; patch: Partial<Conversation> }
   | { type: 'add_conversation'; conversation: Conversation }
+  | { type: 'delete_conversation'; id: ID }
   | { type: 'set_typing'; conversationId: ID; typing: boolean }
   | { type: 'mark_read'; conversationId: ID }
   | { type: 'read_all_notifications' }
@@ -174,6 +175,21 @@ function reducer(state: State, action: Action): State {
       }
     case 'add_conversation':
       return { ...state, conversations: [action.conversation, ...state.conversations] }
+    case 'delete_conversation': {
+      // Removes the conversation from the CURRENT user's visible history only
+      // (PD-068). The mock store represents this user's device view, so the
+      // other participant / group / membership are conceptually unaffected
+      // (PD-070). Local message copies go with the local conversation.
+      const conv = state.conversations.find((c) => c.id === action.id)
+      if (!conv) return state
+      const messages = { ...state.messages }
+      conv.messageIds.forEach((mid) => delete messages[mid])
+      return {
+        ...state,
+        conversations: state.conversations.filter((c) => c.id !== action.id),
+        messages,
+      }
+    }
     case 'set_typing':
       return { ...state, typing: { ...state.typing, [action.conversationId]: action.typing } }
     case 'mark_read':
@@ -252,6 +268,8 @@ interface StoreApi {
   setDraft: (conversationId: ID, draft: string) => void
   togglePin: (id: ID) => void
   toggleMute: (id: ID) => void
+  /** FLOW-021 (PD-068/PD-070): removes this user's copy of the conversation. */
+  deleteConversation: (id: ID) => void
   setAnnouncementMode: (id: ID, on: boolean) => void
   togglePinMessage: (messageId: ID) => void
   toggleArchive: (id: ID) => void
@@ -373,6 +391,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const c = state.conversations.find((x) => x.id === id)
         dispatch({ type: 'patch_conversation', id, patch: { muted: !c?.muted } })
       },
+      deleteConversation: (id) => dispatch({ type: 'delete_conversation', id }),
       setAnnouncementMode: (id, on) =>
         dispatch({ type: 'patch_conversation', id, patch: { announcementMode: on } }),
       togglePinMessage: (messageId) => {

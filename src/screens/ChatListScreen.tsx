@@ -12,6 +12,7 @@ import {
   Settings2,
   ArchiveRestore,
   MessageSquare,
+  Trash2,
 } from 'lucide-react'
 import { useRouter } from '@/lib/router'
 import {
@@ -22,6 +23,7 @@ import {
   Fab,
   ConversationListItem,
   ActionSheet,
+  ConfirmDialog,
   EmptyState,
   Icon,
   previewOf,
@@ -51,21 +53,23 @@ export function ChatListScreen({ archived = false }: { archived?: boolean }) {
   const [filter, setFilter] = useState<Filter>('all')
   const [query, setQuery] = useState('')
   const [menuFor, setMenuFor] = useState<Conversation | null>(null)
+  const [deleteFor, setDeleteFor] = useState<Conversation | null>(null)
   const [topMenu, setTopMenu] = useState(false)
 
   const users = state.users
+  // Archived conversations remain searchable (PD-069 / PS-001 acceptance criteria).
+  const archivedList = useConversationList({ archived: true })
 
   const filtered = useMemo(() => {
-    return list.filter((c) => {
+    const q = query.trim().toLowerCase()
+    const source = !archived && q ? [...list, ...archivedList] : list
+    return source.filter((c) => {
       if (filter === 'unread' && c.unread === 0) return false
       if (filter === 'groups' && c.kind !== 'group') return false
-      if (query.trim()) {
-        const t = conversationTitle(c, users).toLowerCase()
-        if (!t.includes(query.trim().toLowerCase())) return false
-      }
+      if (q && !conversationTitle(c, users).toLowerCase().includes(q)) return false
       return true
     })
-  }, [list, filter, query, users])
+  }, [list, archivedList, archived, filter, query, users])
 
   const lastOf = (c: Conversation) => latestMessage(c, state.messages)
 
@@ -209,9 +213,31 @@ export function ChatListScreen({ archived = false }: { archived?: boolean }) {
                 { label: menuFor.muted ? 'Unmute' : 'Mute', icon: menuFor.muted ? Bell : BellOff, onSelect: () => { store.toggleMute(menuFor.id); toast.show(menuFor.muted ? 'Unmuted' : 'Muted') } },
                 { label: menuFor.unread ? 'Mark as read' : 'Mark as unread', icon: CheckCheck, onSelect: () => store.markRead(menuFor.id) },
                 { label: menuFor.archived ? 'Unarchive' : 'Archive', icon: menuFor.archived ? ArchiveRestore : Archive, onSelect: () => { store.toggleArchive(menuFor.id); toast.show(menuFor.archived ? 'Unarchived' : 'Archived') } },
+                // FLOW-021 — Delete Conversation (PD-068/PD-070); requires confirmation
+                { label: 'Delete conversation', icon: Trash2, danger: true, onSelect: () => setDeleteFor(menuFor) },
               ]
             : []
         }
+      />
+
+      {/* Delete Conversation confirmation (PD-068/PD-070 — current user's copy only) */}
+      <ConfirmDialog
+        open={!!deleteFor}
+        onClose={() => setDeleteFor(null)}
+        onConfirm={() => {
+          if (!deleteFor) return
+          store.deleteConversation(deleteFor.id)
+          toast.show('Conversation removed from your chat list')
+        }}
+        icon={Trash2}
+        tone="danger"
+        title="Delete conversation?"
+        description={
+          deleteFor?.kind === 'group'
+            ? 'This removes the group conversation from your chat list only. You remain a member, the group continues, and other members are unaffected.'
+            : `This removes the conversation from your chat list only. ${deleteFor ? conversationTitle(deleteFor, users) : 'The other person'} is not affected.`
+        }
+        confirmLabel="Delete"
       />
 
       {/* Top-bar overflow */}
