@@ -20,7 +20,7 @@ export function SplashScreen() {
   }, [navigate])
 
   return (
-    <div className="sb-splash" role="status" aria-label="SystemBoom Chat is starting">
+    <div className="sb-splash" role="status" aria-label="SYSTEMBOOM Chat is starting">
       <div className="sb-splash__mark">
         <BrandMark size={104} />
       </div>

@@ -88,7 +88,7 @@ export function NewChatScreen() {
           </>
         )}
 
-        <p className="sb-section-label" style={{ padding: '12px 12px 6px' }}>Contacts on SystemBoom</p>
+        <p className="sb-section-label" style={{ padding: '12px 12px 6px' }}>Contacts on SYSTEMBOOM</p>
 
         {contacts.map((u) => (
           <button key={u.id} className="sb-convo" onClick={() => openChat(u)}>
@@ -98,7 +98,7 @@ export function NewChatScreen() {
                 <span className="sb-name-text">{u.name}</span>
                 {u.verified && <Icon as={Check} size={13} className="sb-inline-verified" label="Verified" />}
               </span>
-              <span className="sb-convo__preview">{u.about ?? u.phone ?? 'SystemBoom user'}</span>
+              <span className="sb-convo__preview">{u.about ?? u.phone ?? 'SYSTEMBOOM user'}</span>
             </span>
           </button>
         ))}
@@ -199,7 +199,7 @@ export function CreateGroupScreen() {
               <Avatar name={u.name} kind={u.business ? 'business' : 'user'} size="lg" presence={u.presence} />
               <span className="sb-convo__body">
                 <span className="sb-convo__name">{u.name}</span>
-                <span className="sb-convo__preview">{u.about ?? u.phone ?? 'SystemBoom user'}</span>
+                <span className="sb-convo__preview">{u.about ?? u.phone ?? 'SYSTEMBOOM user'}</span>
               </span>
               <span
                 aria-hidden

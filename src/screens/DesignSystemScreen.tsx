@@ -90,7 +90,7 @@ export function DesignSystemScreen() {
       <TopAppBar title="Design System" subtitle="DS-002 · DS-003 Foundation" onBack={back} />
       <div className="sb-content sb-block" data-scroll-region>
         <Banner tone="info">
-          Every screen in SystemBoom is built from these tokens and components.
+          Every screen in SYSTEMBOOM is built from these tokens and components.
           Toggle the theme in <strong>Profile → Appearance</strong> to see them adapt.
         </Banner>
 

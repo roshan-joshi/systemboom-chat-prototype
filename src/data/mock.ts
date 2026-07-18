@@ -24,7 +24,7 @@ export const ME = 'me'
 
 export const USERS: Record<string, User> = {
   me: { id: 'me', name: 'Aarav Sharma', about: 'Building calm software.', phone: '+977 98•• ••• 210', presence: 'online', verified: true },
-  u_sita: { id: 'u_sita', name: 'Sita Rai', about: 'Designer @ SystemBoom', presence: 'online', phone: '+977 9801 234 567' },
+  u_sita: { id: 'u_sita', name: 'Sita Rai', about: 'Designer @ SYSTEMBOOM', presence: 'online', phone: '+977 9801 234 567' },
   u_bibek: { id: 'u_bibek', name: 'Bibek Thapa', about: 'Coffee & code', presence: 'away', lastSeen: '15 min ago', phone: '+977 9802 345 678' },
   u_anita: { id: 'u_anita', name: 'Anita Gurung', about: 'Travel a lot ✈️', presence: 'offline', lastSeen: 'today at 9:14', phone: '+977 9803 456 789' },
   u_prakash: { id: 'u_prakash', name: 'Prakash Sharma', presence: 'offline', lastSeen: 'yesterday', phone: '+977 9804 567 890' },
@@ -32,7 +32,7 @@ export const USERS: Record<string, User> = {
   u_rojan: { id: 'u_rojan', name: 'Rojan KC', presence: 'away', lastSeen: '1 hr ago', phone: '+977 9806 789 012' },
   u_deepa: { id: 'u_deepa', name: 'Deepa Shrestha', presence: 'online', phone: '+977 9807 890 123' },
   u_arjun: { id: 'u_arjun', name: 'Arjun Basnet', presence: 'offline', lastSeen: '3 hr ago', phone: '+977 9808 901 234' },
-  u_boom: { id: 'u_boom', name: 'Boom Store', about: 'Official SystemBoom merchandise', presence: 'online', verified: true, business: true },
+  u_boom: { id: 'u_boom', name: 'Boom Store', about: 'Official SYSTEMBOOM merchandise', presence: 'online', verified: true, business: true },
   u_mom: { id: 'u_mom', name: 'Aama', presence: 'offline', lastSeen: 'today at 8:02', phone: '+977 9800 000 001' },
   u_dai: { id: 'u_dai', name: 'Nabin Dai', presence: 'away', phone: '+977 9800 000 002' },
 }
@@ -59,7 +59,7 @@ const T_SITA = build('c_sita', [
   { authorId: 'u_sita', type: 'voice', voice: { duration: '0:14', waveform: [3, 6, 9, 5, 8, 12, 7, 4, 9, 6, 3, 8, 11, 5, 7, 4, 6] }, at: ago(2 * HR) },
   { authorId: ME, type: 'text', text: 'Great summary. Let me fold that into the spec.', at: ago(2 * HR - 3 * MIN) },
   { authorId: 'u_sita', type: 'image', image: { url: 'grad-1', caption: 'Latest palette exploration' }, at: ago(40 * MIN), pinned: true },
-  { authorId: 'u_sita', type: 'text', text: 'Which one feels most “SystemBoom” to you?', at: ago(38 * MIN) },
+  { authorId: 'u_sita', type: 'text', text: 'Which one feels most “SYSTEMBOOM” to you?', at: ago(38 * MIN) },
   { authorId: ME, type: 'text', text: 'The indigo one. It reads trustworthy without being cold.', at: ago(9 * MIN), status: 'read' },
   { authorId: 'u_sita', type: 'text', text: 'Agreed. I’ll update the tokens 👇', at: ago(4 * MIN) },
 ])
@@ -67,7 +67,7 @@ const T_SITA = build('c_sita', [
 const T_BOOM = build('c_boom', [
   { authorId: 'u_boom', type: 'text', text: 'Hi Aarav! Thanks for reaching out. How can we help today?', at: ago(1 * DAY) },
   { authorId: ME, type: 'text', text: 'Hey! Interested in the desk mat — is the large size in stock?', at: ago(1 * DAY - 5 * MIN) },
-  { authorId: 'u_boom', type: 'product', product: { title: 'SystemBoom Desk Mat — Large', price: 'Rs 2,400', image: 'prod-1', seller: 'Boom Store', availability: 'In stock' }, at: ago(1 * DAY - 8 * MIN) },
+  { authorId: 'u_boom', type: 'product', product: { title: 'SYSTEMBOOM Desk Mat — Large', price: 'Rs 2,400', image: 'prod-1', seller: 'Boom Store', availability: 'In stock' }, at: ago(1 * DAY - 8 * MIN) },
   { authorId: 'u_boom', type: 'text', text: 'Yes! Large is in stock. Free delivery inside the valley.', at: ago(1 * DAY - 8 * MIN + 20_000) },
   { authorId: ME, type: 'text', text: 'Perfect. Could you do 2 for a small discount?', at: ago(1 * DAY - 20 * MIN) },
   { authorId: 'u_boom', type: 'text', text: 'We can do Rs 4,500 for two 🙂', at: ago(22 * HR) },
@@ -276,9 +276,9 @@ Object.assign(USERS, {
 })
 
 export const PRODUCTS: Product[] = [
-  { id: 'p_deskmat', title: 'SystemBoom Desk Mat — Large', price: 2400, image: 'p1', category: 'Home', sellerId: 'u_boom', availability: 'In stock', rating: 4.8, reviews: 126, description: 'Natural cork base with stitched edges. A calm, premium surface for your desk. 900 × 400 mm.' },
-  { id: 'p_buds', title: 'SystemBoom Wireless Buds', price: 6900, image: 'p2', category: 'Tech', sellerId: 'u_boom', availability: 'In stock', rating: 4.6, reviews: 210, description: 'Active noise cancellation, 32-hour battery, and a featherlight fit. Tuned for calls and calm listening.' },
-  { id: 'p_tote', title: 'SystemBoom Canvas Tote', price: 1200, image: 'p3', category: 'Apparel', sellerId: 'u_boom', availability: 'In stock', rating: 4.6, reviews: 84, description: 'Heavyweight organic cotton with an internal pocket. Everyday carry, quietly branded.' },
+  { id: 'p_deskmat', title: 'SYSTEMBOOM Desk Mat — Large', price: 2400, image: 'p1', category: 'Home', sellerId: 'u_boom', availability: 'In stock', rating: 4.8, reviews: 126, description: 'Natural cork base with stitched edges. A calm, premium surface for your desk. 900 × 400 mm.' },
+  { id: 'p_buds', title: 'SYSTEMBOOM Wireless Buds', price: 6900, image: 'p2', category: 'Tech', sellerId: 'u_boom', availability: 'In stock', rating: 4.6, reviews: 210, description: 'Active noise cancellation, 32-hour battery, and a featherlight fit. Tuned for calls and calm listening.' },
+  { id: 'p_tote', title: 'SYSTEMBOOM Canvas Tote', price: 1200, image: 'p3', category: 'Apparel', sellerId: 'u_boom', availability: 'In stock', rating: 4.6, reviews: 84, description: 'Heavyweight organic cotton with an internal pocket. Everyday carry, quietly branded.' },
   { id: 'p_bottle', title: 'Insulated Steel Bottle', price: 1800, image: 'p4', category: 'Home', sellerId: 'u_boom', availability: 'Low stock', rating: 4.7, reviews: 52, description: 'Keeps drinks cold 24h / hot 12h. Powder-coated, leak-proof, 750 ml.' },
   { id: 'p_scarf', title: 'Handwoven Pashmina Scarf', price: 3200, image: 'p5', category: 'Craft', sellerId: 'u_himal', availability: 'In stock', rating: 5.0, reviews: 61, description: 'Ethically sourced cashmere, handwoven by artisans in Kathmandu. Soft, warm, timeless.' },
   { id: 'p_hoodie', title: 'Everest Wool Hoodie', price: 4500, image: 'p6', category: 'Apparel', sellerId: 'u_himal', availability: 'Made to order', rating: 4.9, reviews: 38, description: 'Merino-blend, brushed interior, made to your size in 7–10 days.' },
@@ -293,7 +293,7 @@ export const ORDERS: Order[] = [
     id: 'ord_demo',
     conversationId: 'c_boom',
     sellerId: 'u_boom',
-    items: [{ productId: 'p_deskmat', title: 'SystemBoom Desk Mat — Large', image: 'p1', unitPrice: 2250, qty: 2 }],
+    items: [{ productId: 'p_deskmat', title: 'SYSTEMBOOM Desk Mat — Large', image: 'p1', unitPrice: 2250, qty: 2 }],
     finalPrice: 4500,
     deliveryFee: 0,
     address: 'Baneshwor, Kathmandu 44600',

@@ -398,13 +398,13 @@ export function QRScannerScreen() {
           {scanError ? (
             <Card pad style={{ width: '100%', maxWidth: 360 }}>
               <Banner tone="error" icon={ScanLine}>
-                <strong>Couldn’t read the code.</strong> Make sure it’s a SystemBoom anonymous QR and that it’s well lit, then try again.
+                <strong>Couldn’t read the code.</strong> Make sure it’s a SYSTEMBOOM anonymous QR and that it’s well lit, then try again.
               </Banner>
               <Button block iconStart={ScanLine} onClick={rescan} style={{ marginTop: 12 }}>Try again</Button>
             </Card>
           ) : !found ? (
             <>
-              <p style={{ color: 'var(--sb-text-secondary)' }}>Point at a SystemBoom anonymous QR code…</p>
+              <p style={{ color: 'var(--sb-text-secondary)' }}>Point at a SYSTEMBOOM anonymous QR code…</p>
               <div className="sb-row sb-gap-3" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
                 <Button variant="tertiary" onClick={() => setFound({ name: randomName(), fingerprint: fakeFingerprint('now') })}>Simulate a scan</Button>
                 <Button variant="tertiary" onClick={() => setScanError(true)}>Simulate scan error</Button>

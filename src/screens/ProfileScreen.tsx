@@ -195,7 +195,7 @@ export function ProfileScreen() {
         </Button>
 
         <p style={{ textAlign: 'center', fontSize: 'var(--sb-text-label)', color: 'var(--sb-text-tertiary)' }}>
-          SystemBoom Chat · Prototype · Phase 1 Foundation
+          SYSTEMBOOM Chat · Prototype · Phase 1 Foundation
         </p>
       </div>
 

@@ -159,7 +159,7 @@ export function ChatListScreen({ archived = false }: { archived?: boolean }) {
                       ? 'Every conversation is read. Enjoy the calm.'
                       : filter === 'groups'
                         ? 'Create a group to collaborate with several people in one conversation.'
-                        : 'Start your first conversation — everything in SystemBoom begins with a chat.'
+                        : 'Start your first conversation — everything in SYSTEMBOOM begins with a chat.'
               }
             />
           </div>

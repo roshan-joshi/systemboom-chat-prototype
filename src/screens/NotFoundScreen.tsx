@@ -11,7 +11,7 @@ export function NotFoundScreen() {
         <EmptyState
           icon={Compass}
           title="This screen doesn't exist yet"
-          description="Every screen in SystemBoom has a permanent ID (SC-XXX). This route isn't mapped — let's get you back to a conversation."
+          description="Every screen in SYSTEMBOOM has a permanent ID (SC-XXX). This route isn't mapped — let's get you back to a conversation."
           action={<Button onClick={() => navigate('/home')}>Go home</Button>}
         />
       </div>

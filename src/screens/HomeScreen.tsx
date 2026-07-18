@@ -40,7 +40,7 @@ export function HomeScreen() {
           <BrandMark size={44} />
           <div>
             <p className="sb-section-label">{greeting}</p>
-            <h2 className="sb-hub__greeting">Welcome to SystemBoom</h2>
+            <h2 className="sb-hub__greeting">Welcome to SYSTEMBOOM</h2>
           </div>
         </div>
 
@@ -97,7 +97,7 @@ export function HomeScreen() {
             <Icon as={Sparkles} size="md" />
           </span>
           <div className="sb-grow">
-            <div className="sb-hub__tile-title">SystemBoom AI</div>
+            <div className="sb-hub__tile-title">SYSTEMBOOM AI</div>
             <div className="sb-hub__tile-sub">Smart replies, summaries & reminders — always on your terms.</div>
           </div>
           <Badge tone="info">Assist</Badge>
@@ -111,7 +111,7 @@ export function HomeScreen() {
           </span>
           <div className="sb-grow">
             <div className="sb-hub__tile-title">Design System</div>
-            <div className="sb-hub__tile-sub">Explore the SystemBoom foundation — tokens & components.</div>
+            <div className="sb-hub__tile-sub">Explore the SYSTEMBOOM foundation — tokens & components.</div>
           </div>
           <Icon as={ArrowRight} size="sm" />
         </Card>

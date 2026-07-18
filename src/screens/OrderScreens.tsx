@@ -311,7 +311,7 @@ export function PaymentScreen() {
           )}
 
           <div className="sb-securebar">
-            <Icon as={ShieldCheck} size="sm" /> Secured by SystemBoom Pay · details are never stored or shown in chat
+            <Icon as={ShieldCheck} size="sm" /> Secured by SYSTEMBOOM Pay · details are never stored or shown in chat
           </div>
         </div>
       </div>

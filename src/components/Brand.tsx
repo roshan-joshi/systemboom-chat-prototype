@@ -3,7 +3,7 @@ import logoUrl from '@/assets/systemboom-logo.png'
 import markUrl from '@/assets/systemboom-mark.png'
 
 /*
-  Official SystemBoom identity. The mascot (bomb) is the app mark; the full
+  Official SYSTEMBOOM identity. The mascot (bomb) is the app mark; the full
   logo (mascot + chrome wordmark) is used where the brand is presented at size.
 */
 
@@ -29,7 +29,7 @@ export function BrandMark({
   )
 }
 
-/** Full SystemBoom logo (mascot + wordmark). `height` drives the size. */
+/** Full SYSTEMBOOM logo (mascot + wordmark). `height` drives the size. */
 export function BrandLogo({
   height = 32,
   className,
@@ -40,7 +40,7 @@ export function BrandLogo({
   return (
     <img
       src={logoUrl}
-      alt="SystemBoom"
+      alt="SYSTEMBOOM"
       height={height}
       className={cx(className)}
       style={{ height, width: 'auto', display: 'block' }}
@@ -70,7 +70,7 @@ export function Wordmark({
           color: 'var(--sb-text)',
         }}
       >
-        System<span style={{ color: 'var(--sb-brand)' }}>Boom</span>
+        SYSTEM<span style={{ color: 'var(--sb-brand)' }}>BOOM</span>
       </span>
     </span>
   )

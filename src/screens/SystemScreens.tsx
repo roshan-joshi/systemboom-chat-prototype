@@ -172,7 +172,7 @@ export function SettingsScreen() {
           <Group rows={[
             { icon: Palette, title: 'Appearance', sub: 'Theme & display', to: '/profile' },
             { icon: CircleHelp, title: 'Help', sub: 'FAQ & support', onClick: () => toast.show('Help centre (prototype)') },
-            { icon: Info, title: 'About', sub: 'SystemBoom Chat · Prototype', onClick: () => toast.show('SystemBoom Chat — Phase 2') },
+            { icon: Info, title: 'About', sub: 'SYSTEMBOOM Chat · Prototype', onClick: () => toast.show('SYSTEMBOOM Chat — Phase 2') },
           ]} />
 
           <p className="sb-section-label">Prototype</p>

@@ -58,10 +58,10 @@ export function AppShell() {
   useEffect(() => {
     const label = navItems.find((n) => n.id === route.tab)?.label
     document.title = anon
-      ? 'SystemBoom · Anonymous'
+      ? 'SYSTEMBOOM · Anonymous'
       : label
-        ? `SystemBoom · ${label}`
-        : 'SystemBoom Chat'
+        ? `SYSTEMBOOM · ${label}`
+        : 'SYSTEMBOOM Chat'
   }, [route, anon, navItems])
 
   const isDesktop = breakpoint === 'desktop'
@@ -96,7 +96,7 @@ export function AppShell() {
             items={navItems}
             activeId={route.tab ?? ''}
             brand={
-              <Link to={anon ? '/anon' : '/home'} aria-label="SystemBoom home">
+              <Link to={anon ? '/anon' : '/home'} aria-label="SYSTEMBOOM home">
                 <BrandMark size={40} />
               </Link>
             }
